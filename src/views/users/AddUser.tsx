@@ -21,11 +21,11 @@ import FormControl from '@mui/material/FormControl'
 import { addUser } from '@/store/slices/userSlice'
 
 interface UserFormData {
-  name: string
-  email: string
-  phone: string
+  full_name: string
+  phone_number: string
   role: string
   password: string
+  email?: string
   password_confirmation: string
 }
 
@@ -34,9 +34,9 @@ const AddUser = () => {
   const { isLoading, error } = useAppSelector(state => state.users)
 
   const [formData, setFormData] = useState<UserFormData>({
-    name: '',
+    full_name: '',
     email: '',
-    phone: '',
+    phone_number: '',
     role: 'user',
     password: '',
     password_confirmation: ''
@@ -64,9 +64,9 @@ const AddUser = () => {
 
       // Reset form
       setFormData({
-        name: '',
+        full_name: '',
         email: '',
-        phone: '',
+        phone_number: '',
         role: 'user',
         password: '',
         password_confirmation: ''
@@ -106,7 +106,7 @@ const AddUser = () => {
                     fullWidth
                     label='Full Name'
                     name='name'
-                    value={formData.name}
+                    value={formData.full_name}
                     onChange={handleChange}
                     required
                   />
@@ -127,7 +127,7 @@ const AddUser = () => {
                     fullWidth
                     label='Phone Number'
                     name='phone'
-                    value={formData.phone}
+                    value={formData.phone_number}
                     onChange={handleChange}
                     required
                   />
@@ -140,7 +140,9 @@ const AddUser = () => {
                       name='role'
                       value={formData.role}
                       label='Role'
-                      onChange={handleChange}
+                      onChange={e =>
+                        handleChange(e as React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>)
+                      }
                     >
                       <MenuItem value='user'>User</MenuItem>
                       <MenuItem value='admin'>Admin</MenuItem>
