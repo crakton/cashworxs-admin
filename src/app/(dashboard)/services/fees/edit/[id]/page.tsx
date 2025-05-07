@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
 // MUI Imports
@@ -15,7 +15,7 @@ import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
+import Select, { SelectChangeEvent } from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormHelperText from '@mui/material/FormHelperText'
 import Box from '@mui/material/Box'
@@ -26,9 +26,6 @@ import Link from '@mui/material/Link'
 import LinearProgress from '@mui/material/LinearProgress'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import Accordion from '@mui/material/Accordion'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import AccordionDetails from '@mui/material/AccordionDetails'
 import Chip from '@mui/material/Chip'
 import Table from '@mui/material/Table'
 import TableHead from '@mui/material/TableHead'
@@ -89,7 +86,11 @@ const EditFeeServicePage = () => {
   })
 
   // Edit service item dialog
-  const [editServiceDialog, setEditServiceDialog] = useState({
+  const [editServiceDialog, setEditServiceDialog] = useState<{
+    open: boolean
+    serviceId: string
+    serviceData: FeeService['services'][0] | null
+  }>({
     open: false,
     serviceId: '',
     serviceData: null
@@ -122,6 +123,22 @@ const EditFeeServicePage = () => {
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+
+    // Clear validation error when user types
+    if (formErrors[name as keyof typeof formErrors]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }))
+    }
+  }
+
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
@@ -201,8 +218,18 @@ const EditFeeServicePage = () => {
       }
     }))
   }
+  const handleServiceSelectChange = (e: SelectChangeEvent<string>) => {
+    const { name, value } = e.target
+    setServiceDialog(prev => ({
+      ...prev,
+      serviceData: {
+        ...prev.serviceData,
+        [name]: value
+      }
+    }))
+  }
 
-  const handleServiceMetadataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleServiceMetadataChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target
     setServiceDialog(prev => ({
       ...prev,
@@ -347,10 +374,10 @@ const EditFeeServicePage = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Breadcrumbs aria-label='breadcrumb' sx={{ mb: 2 }}>
-          <Link underline='hover' color='inherit' href='/dashboard'>
+          <Link underline='hover' color='inherit' href='/'>
             Dashboard
           </Link>
-          <Link underline='hover' color='inherit' href='/fees'>
+          <Link underline='hover' color='inherit' href='/services/fees'>
             Fee Services
           </Link>
           <Typography color='text.primary'>Edit Fee Service</Typography>
@@ -409,7 +436,7 @@ const EditFeeServicePage = () => {
                         labelId='fee-type-label'
                         name='type'
                         value={formData.type}
-                        onChange={handleInputChange}
+                        onChange={handleSelectChange}
                         label='Fee Type'
                         disabled={isSubmitting}
                       >
@@ -557,8 +584,8 @@ const EditFeeServicePage = () => {
                 <InputLabel>Status</InputLabel>
                 <Select
                   name='status'
-                  value={serviceDialog.serviceData.status}
-                  onChange={handleServiceInputChange}
+                  value={String(serviceDialog.serviceData.status)}
+                  onChange={handleServiceSelectChange}
                   label='Status'
                 >
                   <MenuItem value={1}>Active</MenuItem>

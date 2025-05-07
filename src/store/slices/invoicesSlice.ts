@@ -94,13 +94,9 @@ export const fetchInvoiceDetails = createAsyncThunk(
         }
       })
       const invoice = response.data.data.invoice
-      console.log('invoice fetched', invoice)
 
       return invoice
     } catch (error: any) {
-      if (error.response?.status === 401) {
-        Cookies.remove('auth_token')
-      }
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch invoice details')
     }
   }

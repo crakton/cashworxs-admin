@@ -28,8 +28,6 @@ const InvoiceDetailsPage = () => {
   const { currentInvoice: invoice, isLoading, error } = useAppSelector(state => state.invoices)
   const [fetchError, setFetchError] = useState(null)
 
-  console.log('invoice', invoice)
-
   useEffect(() => {
     if (typeof id === 'string') {
       dispatch(fetchInvoiceDetails(id))

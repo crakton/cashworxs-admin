@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice'
 import activitiesReducer from './slices/activitiesSlice'
 import dashboardReducer from './slices/dashboardSlice'
 import onboardingReducer from './slices/onboardingSlice'
+import organizationsReducer from './slices/organizationsSlice'
 import userReducer from './slices/userSlice'
 import paymentsReducer from './slices/paymentsSlice'
 import invoicesReducer from './slices/invoicesSlice'
@@ -15,6 +16,7 @@ export const store = configureStore({
     auth: authReducer,
     dashboard: dashboardReducer,
     onboarding: onboardingReducer,
+    organizations: organizationsReducer,
     users: userReducer,
     payments: paymentsReducer,
     fees: feesReducer,

@@ -58,7 +58,6 @@ export default function SettingsPage() {
   }
 
   const handleSaveChanges = () => {
-    console.log('Save user settings:', selectedUser)
     setEditDialogOpen(false)
   }
 

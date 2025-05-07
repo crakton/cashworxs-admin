@@ -146,8 +146,6 @@ export const fetchPaymentDetails = createAsyncThunk(
         }
       })
 
-      console.log('payments', response.data.data)
-
       return response.data.data
     } catch (error: any) {
       if (error.response?.status === 401) {

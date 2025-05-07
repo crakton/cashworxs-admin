@@ -62,9 +62,6 @@ const UserDetailPage = () => {
   const { id } = useParams() as { id: string }
   const dispatch = useAppDispatch()
   const { currentUser, isLoading, error, transactions } = useAppSelector(state => state.users)
-
-  console.log('currentUser', currentUser)
-
   // State
   const [tabValue, setTabValue] = useState(0)
   const [formData, setFormData] = useState({

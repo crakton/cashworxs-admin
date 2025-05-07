@@ -11,9 +11,10 @@ export interface TaxService {
   name: string
   type: string
   state: string
-  amount: string
+  amount: string | number
   description: string
-  status: number
+  status: number | boolean
+  organization_id?: string // Added this field
   metadata: {
     payment_support: string[]
     payment_type: string
@@ -57,6 +58,10 @@ const handleApiError = (error: any) => {
   }
 
   // Handle other API errors
+  if (error.response?.data?.data?.error) {
+    return error.response.data.data.error
+  }
+
   return error.response?.data?.message || error.message || 'An unexpected error occurred'
 }
 
@@ -67,6 +72,11 @@ const getAuthToken = () => {
     throw new Error('No authentication token found')
   }
   return token
+}
+
+// Get organization ID from cookies or session storage
+const getOrganizationId = () => {
+  return Cookies.get('organization_id') || sessionStorage.getItem('organization_id') || null
 }
 
 // Async thunks
@@ -80,7 +90,7 @@ export const fetchServiceTaxes = createAsyncThunk('taxes/fetchServiceTaxes', asy
       }
     })
 
-    return response.data.data.taxes
+    return response.data.data.taxes || response.data.data.fees || []
   } catch (error: any) {
     return rejectWithValue(handleApiError(error))
   }
@@ -96,7 +106,7 @@ export const fetchSingleTax = createAsyncThunk('taxes/fetchSingleTax', async (id
       }
     })
 
-    return response.data.data.tax
+    return response.data.data.tax || response.data.data.fee
   } catch (error: any) {
     return rejectWithValue(handleApiError(error))
   }
@@ -107,16 +117,38 @@ export const createServiceTax = createAsyncThunk(
   async (taxData: Partial<TaxService>, { rejectWithValue }) => {
     try {
       const token = getAuthToken()
+      const organizationId = getOrganizationId()
 
-      const response = await axios.post(`${API_URL}/services/taxes`, taxData, {
+      // Format data to ensure it matches what the server expects
+      const formattedData = {
+        ...taxData,
+        // Add organization_id
+        organization_id: organizationId,
+        // Ensure amount is a string if that's what the API expects
+        amount: typeof taxData.amount === 'number' ? String(taxData.amount) : taxData.amount,
+        // Ensure status is in the format the server expects (boolean or number)
+        status: typeof taxData.status === 'boolean' ? (taxData.status ? 1 : 0) : taxData.status
+      }
+
+      // Add timeout for better error handling
+      const response = await axios.post(`${API_URL}/services/taxes`, formattedData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 10000 // 10 second timeout
       })
 
-      return response.data.data
+      return response.data.data.tax
     } catch (error: any) {
+      // Enhanced error logging
+      console.error('Error creating tax service:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        requestData: error.config?.data
+      })
+
       return rejectWithValue(handleApiError(error))
     }
   }
@@ -124,17 +156,26 @@ export const createServiceTax = createAsyncThunk(
 
 export const updateServiceTax = createAsyncThunk(
   'taxes/updateServiceTax',
-  async ({ id, taxData }: { id: number | string; taxData: Partial<TaxService> }, { rejectWithValue }) => {
+  async ({ id, taxData }: { id: string; taxData: Partial<TaxService> }, { rejectWithValue }) => {
     try {
       const token = getAuthToken()
+      const organizationId = getOrganizationId()
 
-      const response = await axios.put(`${API_URL}/services/taxes/${id}`, taxData, {
+      const formattedData = {
+        ...taxData,
+        organization_id: organizationId,
+        amount: typeof taxData.amount === 'number' ? String(taxData.amount) : taxData.amount,
+        status: typeof taxData.status === 'boolean' ? (taxData.status ? 1 : 0) : taxData.status
+      }
+
+      const response = await axios.put(`${API_URL}/services/taxes/${id}`, formattedData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })
 
+      // The API returns fee, not tax
       return response.data.data.tax
     } catch (error: any) {
       return rejectWithValue(handleApiError(error))

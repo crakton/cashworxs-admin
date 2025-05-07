@@ -182,7 +182,12 @@ const FeeDetailsPage = () => {
                   <i className='ri ri-arrow-left-line mr-2'></i>
                   Back
                 </Button>
-                <Button variant='outlined' color='primary' component={Link} href={`/fees/edit/${feeDetails.id}`}>
+                <Button
+                  variant='outlined'
+                  color='primary'
+                  component={Link}
+                  href={`/services/fees/edit/${feeDetails.id}`}
+                >
                   <i className='ri ri-edit-line mr-2'></i>
                   Edit
                 </Button>

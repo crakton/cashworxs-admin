@@ -9,6 +9,7 @@ import {
   clearCurrentOrganization,
   fetchOrganizationServices
 } from '@/store/slices/organizationsSlice'
+import { addServiceItem, CreateServiceItemDTO } from '@/store/slices/feesSlice'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -35,6 +36,21 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import TablePagination from '@mui/material/TablePagination'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogTitle from '@mui/material/DialogTitle'
+import TextField from '@mui/material/TextField'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import Select, { SelectChangeEvent } from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import FormHelperText from '@mui/material/FormHelperText'
+import Switch from '@mui/material/Switch'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import InputAdornment from '@mui/material/InputAdornment'
+import Snackbar from '@mui/material/Snackbar'
 
 interface OrganizationDetailProps {
   organizationId: string
@@ -47,6 +63,24 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
 
   const [servicesPage, setServicesPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(5)
+
+  // Modal state
+  const [openModal, setOpenModal] = useState(false)
+  const [newServiceItem, setNewServiceItem] = useState<Partial<CreateServiceItemDTO>>({
+    name: '',
+    type: 'Fee',
+    state: 'Active',
+    amount: '',
+    description: '',
+    status: true,
+    metadata: {
+      payment_support: ['card', 'bank'],
+      payment_type: 'onetime'
+    }
+  })
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+  const [successMessage, setSuccessMessage] = useState('')
+  const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false)
 
   // Fetch organization data
   useEffect(() => {
@@ -71,6 +105,108 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setServicesPage(0)
+  }
+
+  // Modal handlers
+  const handleOpenModal = () => setOpenModal(true)
+  const handleCloseModal = () => {
+    setOpenModal(false)
+    setFormErrors({})
+    setNewServiceItem({
+      name: '',
+      type: 'Fee',
+      state: 'Active',
+      amount: '',
+      description: '',
+      status: true,
+      metadata: {
+        payment_support: ['card', 'bank'],
+        payment_type: 'onetime'
+      }
+    })
+  }
+
+  // Form handlers
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setNewServiceItem(prev => ({ ...prev, [name]: value }))
+
+    // Clear error when field is being edited
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }))
+    }
+  }
+
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
+    const name = e.target.name as string
+    const value = e.target.value
+    setNewServiceItem(prev => ({ ...prev, [name]: value }))
+
+    // Clear error when field is being edited
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }))
+    }
+  }
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewServiceItem(prev => ({ ...prev, status: e.target.checked }))
+  }
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {}
+
+    if (!newServiceItem.name?.trim()) {
+      errors.name = 'Name is required'
+    }
+
+    if (!newServiceItem.amount) {
+      errors.amount = 'Amount is required'
+    } else if (isNaN(Number(newServiceItem.amount))) {
+      errors.amount = 'Amount must be a valid number'
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      return
+    }
+
+    try {
+      if (currentOrganization) {
+        const serviceData: CreateServiceItemDTO = {
+          ...(newServiceItem as CreateServiceItemDTO),
+          fee_id: currentOrganization.id,
+          organization_id: currentOrganization.id,
+          status: newServiceItem.status ? 1 : 0
+        }
+
+        await dispatch(addServiceItem(serviceData)).unwrap()
+
+        // Show success message
+        setSuccessMessage('Service item created successfully')
+        setShowSuccessSnackbar(true)
+
+        // Refresh services list
+        dispatch(fetchOrganizationServices(organizationId))
+
+        // Close modal
+        handleCloseModal()
+      }
+    } catch (err: any) {
+      // Handle the error from the API
+      if (typeof err === 'string') {
+        setFormErrors(prev => ({ ...prev, form: err }))
+      } else {
+        setFormErrors(prev => ({ ...prev, form: 'Failed to create service item' }))
+      }
+    }
+  }
+
+  const handleCloseSnackbar = () => {
+    setShowSuccessSnackbar(false)
   }
 
   if (isLoading) {
@@ -171,14 +307,25 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
             title='Services'
             subheader={`This organization has ${services ? services.length : 0} services`}
             action={
-              <Button
-                size='small'
-                variant='contained'
-                onClick={() => router.push(`/services/create?org=${currentOrganization.id}`)}
-                startIcon={<i className='ri-add-line' />}
-              >
-                Add Service
-              </Button>
+              <Box>
+                <Button
+                  size='small'
+                  variant='contained'
+                  onClick={handleOpenModal}
+                  startIcon={<i className='ri-add-line' />}
+                  sx={{ mr: 2 }}
+                >
+                  Add Service Item
+                </Button>
+                <Button
+                  size='small'
+                  variant='outlined'
+                  onClick={() => router.push(`/services/create?org=${currentOrganization.id}`)}
+                  startIcon={<i className='ri-add-line' />}
+                >
+                  Add Service
+                </Button>
+              </Box>
             }
           />
           <CardContent>
@@ -260,17 +407,181 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
                 </Typography>
                 <Button
                   variant='outlined'
+                  onClick={handleOpenModal}
+                  startIcon={<i className='ri-add-line' />}
+                  sx={{ mt: 2, mr: 2 }}
+                >
+                  Add First Service Item
+                </Button>
+                <Button
+                  variant='outlined'
                   onClick={() => router.push(`/services/create?org=${currentOrganization.id}`)}
                   startIcon={<i className='ri-add-line' />}
                   sx={{ mt: 2 }}
                 >
-                  Add First Service
+                  Add Service
                 </Button>
               </Box>
             )}
           </CardContent>
         </Card>
       </Grid>
+
+      {/* Add Service Item Dialog */}
+      <Dialog open={openModal} onClose={handleCloseModal} maxWidth='md' fullWidth>
+        <DialogTitle>
+          Add Service Item
+          <IconButton
+            aria-label='close'
+            onClick={handleCloseModal}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: theme => theme.palette.grey[500]
+            }}
+          >
+            <i className='ri-close-line' />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {formErrors.form && (
+            <Alert severity='error' sx={{ mb: 3 }}>
+              {formErrors.form}
+            </Alert>
+          )}
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label='Service Name'
+                name='name'
+                value={newServiceItem.name}
+                onChange={handleInputChange}
+                error={!!formErrors.name}
+                helperText={formErrors.name}
+                required
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth required>
+                <InputLabel id='type-label'>Type</InputLabel>
+                <Select
+                  labelId='type-label'
+                  name='type'
+                  value={newServiceItem.type}
+                  label='Type'
+                  onChange={handleSelectChange}
+                >
+                  <MenuItem value='Fee'>Fee</MenuItem>
+                  <MenuItem value='Levy'>Levy</MenuItem>
+                  <MenuItem value='Tax'>Tax</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth required>
+                <InputLabel id='state-label'>State</InputLabel>
+                <Select
+                  labelId='state-label'
+                  name='state'
+                  value={newServiceItem.state}
+                  label='State'
+                  onChange={handleSelectChange}
+                >
+                  <MenuItem value='Active'>Active</MenuItem>
+                  <MenuItem value='Inactive'>Inactive</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label='Amount'
+                name='amount'
+                type='number'
+                value={newServiceItem.amount}
+                onChange={handleInputChange}
+                error={!!formErrors.amount}
+                helperText={formErrors.amount}
+                required
+                InputProps={{
+                  startAdornment: <InputAdornment position='start'>₦</InputAdornment>
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel id='payment-type-label'>Payment Type</InputLabel>
+                <Select
+                  labelId='payment-type-label'
+                  name='paymentType'
+                  value={newServiceItem.metadata?.payment_type || 'onetime'}
+                  label='Payment Type'
+                  onChange={e => {
+                    setNewServiceItem(prev => ({
+                      ...prev,
+                      metadata: {
+                        ...prev.metadata,
+                        payment_type: e.target.value as string
+                      }
+                    }))
+                  }}
+                >
+                  <MenuItem value='onetime'>One-time</MenuItem>
+                  <MenuItem value='recurring'>Recurring</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label='Description'
+                name='description'
+                value={newServiceItem.description}
+                onChange={handleInputChange}
+                multiline
+                rows={3}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch checked={Boolean(newServiceItem.status)} onChange={handleStatusChange} name='status' />
+                }
+                label='Active'
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} variant='outlined'>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} variant='contained' color='primary'>
+            Create Service Item
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={showSuccessSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        message={successMessage}
+        action={
+          <IconButton size='small' aria-label='close' color='inherit' onClick={handleCloseSnackbar}>
+            <i className='ri-close-line' />
+          </IconButton>
+        }
+      />
     </Grid>
   )
 }

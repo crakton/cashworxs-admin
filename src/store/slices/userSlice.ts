@@ -147,8 +147,6 @@ export const updateUser = createAsyncThunk(
       // exempt role
       const { role, ...payload } = userData
 
-      console.log('payload', payload)
-
       const response = await axios.put(`${API_URL}/users/${userId}`, payload, {
         headers: {
           Authorization: `Bearer ${token}`

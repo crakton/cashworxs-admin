@@ -40,7 +40,6 @@ const BadgeContentSpan = styled('span')({
 const UserDropdown = () => {
   // Redux states
   const dispatch = useAppDispatch()
-  const { user } = useAppSelector(state => state.auth)
 
   // States
   const [open, setOpen] = useState(false)
@@ -67,6 +66,8 @@ const UserDropdown = () => {
 
     setOpen(false)
   }
+
+  const { user } = useAppSelector(state => state.auth)
 
   return (
     <>

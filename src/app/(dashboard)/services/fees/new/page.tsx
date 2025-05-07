@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 // MUI Imports
@@ -27,23 +27,39 @@ import Paper from '@mui/material/Paper'
 
 // Redux Imports
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { createServiceFee } from '@/store/slices/feesSlice'
+import { createServiceFee, fetchOrganizations } from '@/store/slices/feesSlice'
 
 const CreateFeeServicePage = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { isLoading, error } = useAppSelector(state => state.fees)
+  const { isLoading, error, organizations } = useAppSelector(state => state.fees)
 
   const [formData, setFormData] = useState({
     name: '',
-    type: 'standard'
+    type: 'standard',
+    state: 'active',
+    amount: '',
+    description: '',
+    status: 1,
+    organization_id: '', // Added organization_id field
+    metadata: {
+      payment_type: 'one_time',
+      payment_support: ['card', 'bank']
+    }
   })
 
   const [formErrors, setFormErrors] = useState({
-    name: ''
+    name: '',
+    amount: '',
+    organization_id: '' // Added organization_id validation
   })
 
   const [successMessage, setSuccessMessage] = useState('')
+
+  // Fetch organizations when component mounts
+  useEffect(() => {
+    dispatch(fetchOrganizations())
+  }, [dispatch])
 
   const handleInputChange = e => {
     const { name, value } = e.target
@@ -61,12 +77,44 @@ const CreateFeeServicePage = () => {
     }
   }
 
+  const handleStatusChange = e => {
+    setFormData(prev => ({
+      ...prev,
+      status: e.target.value === 'active' ? 1 : 0
+    }))
+  }
+
+  const handleMetadataChange = e => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      metadata: {
+        ...prev.metadata,
+        [name]: value
+      }
+    }))
+  }
+
   const validateForm = () => {
-    const errors = {}
+    const errors = {
+      name: '',
+      amount: '',
+      organization_id: ''
+    }
     let isValid = true
 
     if (!formData.name.trim()) {
       errors.name = 'Fee service name is required'
+      isValid = false
+    }
+
+    if (!formData.amount) {
+      errors.amount = 'Amount is required'
+      isValid = false
+    }
+
+    if (!formData.organization_id) {
+      errors.organization_id = 'Organization is required'
       isValid = false
     }
 
@@ -82,18 +130,33 @@ const CreateFeeServicePage = () => {
     }
 
     try {
-      await dispatch(createServiceFee(formData)).unwrap()
+      await dispatch(
+        createServiceFee({
+          ...formData,
+          amount: formData.amount.toString()
+        })
+      ).unwrap()
+
       setSuccessMessage('Fee service created successfully')
 
       // Reset form after successful creation
       setFormData({
         name: '',
-        type: 'standard'
+        type: 'standard',
+        state: 'active',
+        amount: '',
+        description: '',
+        status: 1,
+        organization_id: '',
+        metadata: {
+          payment_type: 'one_time',
+          payment_support: ['card', 'bank']
+        }
       })
 
       // Redirect after short delay
       setTimeout(() => {
-        router.push('/fees')
+        router.push('/services/fees')
       }, 1500)
     } catch (err) {
       console.error('Failed to create fee service:', err)
@@ -152,6 +215,29 @@ const CreateFeeServicePage = () => {
                 </Grid>
 
                 <Grid item xs={12} md={6}>
+                  <FormControl fullWidth required error={!!formErrors.organization_id}>
+                    <InputLabel id='organization-label'>Organization</InputLabel>
+                    <Select
+                      labelId='organization-label'
+                      name='organization_id'
+                      value={formData.organization_id}
+                      onChange={handleInputChange}
+                      label='Organization'
+                      disabled={isLoading}
+                    >
+                      {organizations.map(org => (
+                        <MenuItem key={org.id} value={org.id}>
+                          {org.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    <FormHelperText error={!!formErrors.organization_id}>
+                      {formErrors.organization_id || 'Select the organization this fee belongs to'}
+                    </FormHelperText>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <InputLabel id='fee-type-label'>Fee Type</InputLabel>
                     <Select
@@ -165,9 +251,100 @@ const CreateFeeServicePage = () => {
                       <MenuItem value='standard'>Standard</MenuItem>
                       <MenuItem value='premium'>Premium</MenuItem>
                       <MenuItem value='custom'>Custom</MenuItem>
+                      <MenuItem value='government'>Government</MenuItem>
+                      <MenuItem value='private'>Private</MenuItem>
                     </Select>
                     <FormHelperText>Select the type of fee service</FormHelperText>
                   </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label='Amount'
+                    name='amount'
+                    type='number'
+                    value={formData.amount}
+                    onChange={handleInputChange}
+                    error={!!formErrors.amount}
+                    helperText={formErrors.amount || 'Enter the base amount for this fee service'}
+                    required
+                    disabled={isLoading}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id='fee-state-label'>State</InputLabel>
+                    <Select
+                      labelId='fee-state-label'
+                      name='state'
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      label='State'
+                      disabled={isLoading}
+                    >
+                      <MenuItem value='active'>Active</MenuItem>
+                      <MenuItem value='inactive'>Inactive</MenuItem>
+                      <MenuItem value='pending'>Pending</MenuItem>
+                      <MenuItem value='federal'>Federal</MenuItem>
+                      <MenuItem value='lagos'>Lagos</MenuItem>
+                      <MenuItem value='nationwide'>Nationwide</MenuItem>
+                    </Select>
+                    <FormHelperText>Current state of this fee service</FormHelperText>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id='fee-status-label'>Status</InputLabel>
+                    <Select
+                      labelId='fee-status-label'
+                      name='status'
+                      value={formData.status === 1 ? 'active' : 'inactive'}
+                      onChange={handleStatusChange}
+                      label='Status'
+                      disabled={isLoading}
+                    >
+                      <MenuItem value='active'>Active</MenuItem>
+                      <MenuItem value='inactive'>Inactive</MenuItem>
+                    </Select>
+                    <FormHelperText>Set the status of this fee service</FormHelperText>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id='payment-type-label'>Payment Type</InputLabel>
+                    <Select
+                      labelId='payment-type-label'
+                      name='payment_type'
+                      value={formData.metadata.payment_type}
+                      onChange={handleMetadataChange}
+                      label='Payment Type'
+                      disabled={isLoading}
+                    >
+                      <MenuItem value='one_time'>One-time</MenuItem>
+                      <MenuItem value='recurring'>Recurring</MenuItem>
+                      <MenuItem value='installment'>Installment</MenuItem>
+                      <MenuItem value='annual'>Annual</MenuItem>
+                    </Select>
+                    <FormHelperText>Type of payment for this fee service</FormHelperText>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label='Description'
+                    name='description'
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    multiline
+                    rows={3}
+                    helperText='Provide a description of this fee service (optional)'
+                    disabled={isLoading}
+                  />
                 </Grid>
 
                 <Grid item xs={12}>

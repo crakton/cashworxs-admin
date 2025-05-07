@@ -216,11 +216,7 @@ const FeesServicesPage = () => {
                                   <i className='ri ri-eye-line'></i>
                                 </IconButton>
                               </Tooltip>
-                              <Tooltip title='Edit'>
-                                <IconButton component={Link} href={`/fees/edit/${fee.id}`} size='small' color='primary'>
-                                  <i className='ri ri-edit-line'></i>
-                                </IconButton>
-                              </Tooltip>
+
                               <Tooltip title='Delete'>
                                 <IconButton
                                   size='small'

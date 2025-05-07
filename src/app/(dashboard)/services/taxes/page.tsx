@@ -235,16 +235,7 @@ const TaxesServices = () => {
                                   <i className='ri-eye-line'></i>
                                 </IconButton>
                               </Tooltip>
-                              <Tooltip title='Edit'>
-                                <IconButton
-                                  component={Link}
-                                  href={`/services/taxes/edit/${tax.id}`}
-                                  size='small'
-                                  color='info'
-                                >
-                                  <i className='ri-edit-line'></i>
-                                </IconButton>
-                              </Tooltip>
+
                               <Tooltip title='Delete'>
                                 <IconButton onClick={() => handleOpenDeleteDialog(tax.id)} size='small' color='error'>
                                   <i className='ri-delete-bin-5-line'></i>

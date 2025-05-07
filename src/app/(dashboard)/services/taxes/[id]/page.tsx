@@ -1,270 +1,296 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import Link from 'next/link'
-
-// MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Divider from '@mui/material/Divider'
-import Chip from '@mui/material/Chip'
-import Box from '@mui/material/Box'
-import Skeleton from '@mui/material/Skeleton'
-import Alert from '@mui/material/Alert'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-
-// Redux Imports
+import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { fetchServiceTaxes, deleteServiceTax } from '@/store/slices/taxesSlice'
+import { fetchSingleTax, deleteServiceTax } from '@/store/slices/taxesSlice'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  Grid,
+  Typography,
+  Chip,
+  Button,
+  Box,
+  CircularProgress,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
+  Snackbar
+} from '@mui/material'
+import { useState } from 'react'
 
-const ViewTaxService = () => {
+const ViewTaxPage = ({ params }: { params: { id: string } }) => {
   const router = useRouter()
-  const params = useParams()
-  const taxId = params.id as string
-
   const dispatch = useAppDispatch()
-  const { serviceTaxes, isLoading, error } = useAppSelector(state => state.taxes)
+  const { currentTax, isLoading, error } = useAppSelector(state => state.taxes)
 
-  const [tax, setTax] = useState<any>(null)
-  const [isLoadingTax, setIsLoadingTax] = useState(true)
-  const [taxNotFound, setTaxNotFound] = useState(false)
   const [deleteDialog, setDeleteDialog] = useState<boolean>(false)
-  const [deleteSuccess, setDeleteSuccess] = useState<boolean>(false)
+  const [isDeleting, setIsDeleting] = useState<boolean>(false)
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success'
+  })
 
-  // Fetch tax data
   useEffect(() => {
-    const fetchData = async () => {
-      if (serviceTaxes.length === 0) {
-        await dispatch(fetchServiceTaxes())
-      }
-
-      const foundTax = serviceTaxes.find(tax => tax.id === taxId)
-
-      if (foundTax) {
-        setTax(foundTax)
-        setIsLoadingTax(false)
-      } else if (serviceTaxes.length > 0) {
-        // If taxes were loaded but the specific tax wasn't found
-        setTaxNotFound(true)
-        setIsLoadingTax(false)
-      }
+    if (params.id) {
+      dispatch(fetchSingleTax(params.id))
     }
+  }, [dispatch, params.id])
 
-    fetchData()
-  }, [taxId, dispatch, serviceTaxes])
-
-  const handleDeleteDialogOpen = () => {
+  const handleOpenDeleteDialog = () => {
     setDeleteDialog(true)
   }
 
-  const handleDeleteDialogClose = () => {
+  const handleCloseDeleteDialog = () => {
     setDeleteDialog(false)
   }
 
   const handleDelete = async () => {
-    const result = await dispatch(deleteServiceTax(taxId))
+    if (params.id) {
+      setIsDeleting(true)
+      const result = await dispatch(deleteServiceTax(params.id))
 
-    if (deleteServiceTax.fulfilled.match(result)) {
-      setDeleteSuccess(true)
-      setDeleteDialog(false)
-      setTimeout(() => {
-        router.push('/services/taxes')
-      }, 1500)
+      if (deleteServiceTax.fulfilled.match(result)) {
+        setSnackbar({
+          open: true,
+          message: 'Tax service deleted successfully',
+          severity: 'success'
+        })
+
+        // Navigate back to taxes list after short delay
+        setTimeout(() => {
+          router.push('/services/taxes')
+        }, 1500)
+      } else {
+        setSnackbar({
+          open: true,
+          message: (result.payload as string) || 'Failed to delete tax service',
+          severity: 'error'
+        })
+      }
+
+      setIsDeleting(false)
+      handleCloseDeleteDialog()
     }
   }
 
-  if (taxNotFound) {
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false })
+  }
+
+  if (isLoading) {
     return (
-      <Card sx={{ p: 4, textAlign: 'center' }}>
-        <Typography variant='h6' color='error' gutterBottom>
-          Tax service not found
-        </Typography>
-        <Typography variant='body1' paragraph>
-          The tax service you are looking for could not be found.
-        </Typography>
-        <Button
-          variant='contained'
-          onClick={() => router.push('/services/taxes')}
-          startIcon={<i className='ri ri-arrow-left-line'></i>}
-        >
-          Return to Tax Services
-        </Button>
-      </Card>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
+        <CircularProgress />
+      </Box>
     )
+  }
+
+  if (error) {
+    return <Alert severity='error'>{error}</Alert>
+  }
+
+  if (!currentTax) {
+    return <Typography>Tax not found</Typography>
+  }
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A'
+    return new Date(dateString).toLocaleString()
   }
 
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
-        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button
-            variant='outlined'
-            onClick={() => router.push('/services/taxes')}
-            startIcon={<i className='ri ri-arrow-left-line'></i>}
-          >
-            Back to Tax Services
-          </Button>
-          {!isLoadingTax && tax && (
-            <Box>
-              <Button
-                variant='outlined'
-                component={Link}
-                href={`/services/taxes/edit/${taxId}`}
-                startIcon={<i className='ri ri-edit-line'></i>}
-                sx={{ mr: 2 }}
-              >
-                Edit
-              </Button>
-              <Button
-                variant='outlined'
-                color='error'
-                onClick={handleDeleteDialogOpen}
-                startIcon={<i className='ri ri-delete-bin-5-line'></i>}
-              >
-                Delete
-              </Button>
-            </Box>
-          )}
-        </Box>
-
-        {error && (
-          <Alert severity='error' sx={{ mb: 4 }}>
-            {error}
-          </Alert>
-        )}
-
-        {deleteSuccess && (
-          <Alert severity='success' sx={{ mb: 4 }}>
-            Tax service deleted successfully! Redirecting...
-          </Alert>
-        )}
-
         <Card>
-          <CardHeader title='Tax Service Details' />
-          <Divider />
+          <CardHeader
+            title='Tax Service Details'
+            action={
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button
+                  variant='outlined'
+                  component={Link}
+                  href='/services/taxes'
+                  startIcon={<i className='ri-arrow-left-line' />}
+                >
+                  Back to List
+                </Button>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  component={Link}
+                  href={`/services/taxes/edit/${params.id}`}
+                  startIcon={<i className='ri-edit-line' />}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant='outlined'
+                  color='error'
+                  onClick={handleOpenDeleteDialog}
+                  startIcon={<i className='ri-delete-bin-line' />}
+                >
+                  Delete
+                </Button>
+              </Box>
+            }
+          />
           <CardContent>
-            {isLoadingTax ? (
-              <>
-                <Skeleton variant='text' width='60%' height={40} sx={{ mb: 2 }} />
-                <Skeleton variant='text' width='40%' height={30} sx={{ mb: 2 }} />
-                <Skeleton variant='text' width='70%' height={30} sx={{ mb: 2 }} />
-                <Skeleton variant='text' width='50%' height={30} sx={{ mb: 2 }} />
-                <Skeleton variant='rectangular' width='100%' height={100} sx={{ mb: 2 }} />
-              </>
-            ) : tax ? (
-              <Grid container spacing={4}>
-                <Grid item xs={12} md={6}>
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    ID
-                  </Typography>
-                  <Typography variant='body1' sx={{ mb: 2 }}>
-                    {tax.id}
-                  </Typography>
+            <Grid container spacing={4}>
+              <Grid item xs={12}>
+                <Chip
+                  label={currentTax.status === 1 || currentTax.status === true ? 'Active' : 'Inactive'}
+                  color={currentTax.status === 1 || currentTax.status === true ? 'success' : 'default'}
+                  sx={{ mb: 4 }}
+                />
+              </Grid>
 
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    Name
-                  </Typography>
-                  <Typography variant='body1' sx={{ mb: 2 }}>
-                    {tax.name}
-                  </Typography>
+              <Grid item xs={12} md={6}>
+                <Typography variant='subtitle2' color='text.secondary'>
+                  Name
+                </Typography>
+                <Typography variant='body1' sx={{ fontWeight: 500 }}>
+                  {currentTax.name}
+                </Typography>
+              </Grid>
 
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    Type
-                  </Typography>
-                  <Typography variant='body1' sx={{ mb: 2 }}>
-                    {tax.type.replace('_', ' ')}
-                  </Typography>
+              <Grid item xs={12} md={6}>
+                <Typography variant='subtitle2' color='text.secondary'>
+                  Type
+                </Typography>
+                <Typography variant='body1'>{currentTax.type}</Typography>
+              </Grid>
 
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    State
-                  </Typography>
-                  <Typography variant='body1' sx={{ mb: 2 }}>
-                    {tax.state}
-                  </Typography>
-                </Grid>
+              <Grid item xs={12} md={6}>
+                <Typography variant='subtitle2' color='text.secondary'>
+                  State
+                </Typography>
+                <Typography variant='body1'>{currentTax.state}</Typography>
+              </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    Amount
-                  </Typography>
-                  <Typography variant='body1' sx={{ mb: 2 }}>
-                    {tax.amount}
-                  </Typography>
+              <Grid item xs={12} md={6}>
+                <Typography variant='subtitle2' color='text.secondary'>
+                  Amount
+                </Typography>
+                <Typography variant='body1'>{currentTax.amount}%</Typography>
+              </Grid>
 
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    Status
-                  </Typography>
-                  <Typography variant='body1' sx={{ mb: 2 }}>
-                    <Chip
-                      label={tax.status === 1 ? 'Active' : 'Inactive'}
-                      color={tax.status === 1 ? 'success' : 'default'}
-                    />
-                  </Typography>
+              <Grid item xs={12}>
+                <Typography variant='subtitle2' color='text.secondary'>
+                  Description
+                </Typography>
+                <Typography variant='body1'>{currentTax.description || 'No description provided'}</Typography>
+              </Grid>
 
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    Created At
-                  </Typography>
-                  <Typography variant='body1' sx={{ mb: 2 }}>
-                    {tax.created_at ? new Date(tax.created_at).toLocaleString() : 'N/A'}
-                  </Typography>
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant='h6' sx={{ mb: 2 }}>
+                  Payment Details
+                </Typography>
 
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    Updated At
-                  </Typography>
-                  <Typography variant='body1' sx={{ mb: 2 }}>
-                    {tax.updated_at ? new Date(tax.updated_at).toLocaleString() : 'N/A'}
-                  </Typography>
-                </Grid>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant='subtitle2' color='text.secondary'>
+                      Payment Type
+                    </Typography>
+                    <Typography variant='body1'>{currentTax.metadata?.payment_type || 'Not specified'}</Typography>
+                  </Grid>
 
-                <Grid item xs={12}>
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    Description
-                  </Typography>
-                  <Typography variant='body1' sx={{ mb: 3 }}>
-                    {tax.description}
-                  </Typography>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    Payment Type
-                  </Typography>
-                  <Typography variant='body1' sx={{ mb: 2 }}>
-                    {tax.metadata?.payment_type || 'N/A'}
-                  </Typography>
-
-                  <Typography variant='subtitle1' fontWeight='bold'>
-                    Payment Support
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                    {tax.metadata?.payment_support && tax.metadata.payment_support.length > 0 ? (
-                      tax.metadata.payment_support.map((support: string) => (
-                        <Chip key={support} label={support} color='primary' />
-                      ))
-                    ) : (
-                      <Typography variant='body2'>No payment support methods</Typography>
-                    )}
-                  </Box>
+                  <Grid item xs={12}>
+                    <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
+                      Payment Support Methods
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {(currentTax.metadata?.payment_support || []).length > 0 ? (
+                        currentTax.metadata.payment_support.map((method: string) => (
+                          <Chip key={method} label={method} color='info' size='small' />
+                        ))
+                      ) : (
+                        <Typography variant='body2'>No payment methods specified</Typography>
+                      )}
+                    </Box>
+                  </Grid>
                 </Grid>
               </Grid>
-            ) : (
-              <Alert severity='error' sx={{ mb: 4 }}>
-                Tax service not found
-              </Alert>
-            )}
+
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant='h6' sx={{ mb: 2 }}>
+                  System Information
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant='subtitle2' color='text.secondary'>
+                      ID
+                    </Typography>
+                    <Typography variant='body2' sx={{ fontFamily: 'monospace' }}>
+                      {currentTax.id}
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <Typography variant='subtitle2' color='text.secondary'>
+                      Created
+                    </Typography>
+                    <Typography variant='body2'>{formatDate(currentTax.created_at)}</Typography>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <Typography variant='subtitle2' color='text.secondary'>
+                      Last Updated
+                    </Typography>
+                    <Typography variant='body2'>{formatDate(currentTax.updated_at)}</Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
           </CardContent>
         </Card>
       </Grid>
+
+      {/* Delete Dialog */}
+      <Dialog open={deleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete the tax service "{currentTax.name}"? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+          <Button
+            onClick={handleDelete}
+            color='error'
+            variant='contained'
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} /> : <i className='ri-delete-bin-line' />}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Grid>
   )
 }
 
-export default ViewTaxService
+export default ViewTaxPage
