@@ -1,14 +1,14 @@
 // Component Imports
 
 // Server Action Imports
-import UsersList from '@/views/users/UserList'
-import { getServerMode } from '@core/utils/serverHelpers'
+import UsersList from '@/views/users/UserList';
+import { getServerMode } from '@core/utils/serverHelpers';
 
 const UserListPage = () => {
   // Vars
-  const mode = getServerMode()
+  const mode = getServerMode();
 
-  return <UsersList mode={mode} />
-}
+  return <UsersList mode={mode} />;
+};
 
-export default UserListPage
+export default UserListPage;

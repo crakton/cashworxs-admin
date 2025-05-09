@@ -1,14 +1,14 @@
 // Component Imports
 
 // Server Action Imports
-import AddUser from '@/views/users/AddUser'
-import { getServerMode } from '@core/utils/serverHelpers'
+import AddUser from '@/views/users/AddUser';
+import { getServerMode } from '@core/utils/serverHelpers';
 
 const AddUserPage = () => {
   // Vars
-  const mode = getServerMode()
+  const mode = getServerMode();
 
-  return <AddUser />
-}
+  return <AddUser />;
+};
 
-export default AddUserPage
+export default AddUserPage;

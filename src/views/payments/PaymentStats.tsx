@@ -1,19 +1,21 @@
-'use client'
+'use client';
 
 // MUI Imports
-import Grid from '@mui/material/Grid'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material/styles'
-import Box from '@mui/material/Box'
-import LinearProgress from '@mui/material/LinearProgress'
+import type { FC } from 'react';
+import { useMemo } from 'react';
+
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import LinearProgress from '@mui/material/LinearProgress';
 
 // Types Import
-import { Payment } from '@/store/slices/paymentsSlice'
+import type { Payment } from '@/store/slices/paymentsSlice';
 
 // React Imports
-import { FC, useMemo } from 'react'
 
 interface PaymentMethodStat {
   name: string
@@ -27,7 +29,7 @@ interface PaymentStatsProps {
 }
 
 const PaymentStats: FC<PaymentStatsProps> = ({ payments }) => {
-  const theme = useTheme()
+  const theme = useTheme();
 
   // Calculate payment method statistics
   // const paymentMethodStats = useMemo(() => {
@@ -60,17 +62,17 @@ const PaymentStats: FC<PaymentStatsProps> = ({ payments }) => {
   const getMethodColor = (method: string) => {
     switch (method.toLowerCase()) {
       case 'credit card':
-        return theme.palette.primary.main
+        return theme.palette.primary.main;
       case 'paypal':
-        return theme.palette.info.main
+        return theme.palette.info.main;
       case 'bank transfer':
-        return theme.palette.success.main
+        return theme.palette.success.main;
       case 'crypto':
-        return theme.palette.warning.main
+        return theme.palette.warning.main;
       default:
-        return theme.palette.secondary.main
+        return theme.palette.secondary.main;
     }
-  }
+  };
 
   return (
     <Card>
@@ -141,7 +143,7 @@ const PaymentStats: FC<PaymentStatsProps> = ({ payments }) => {
         </Box>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default PaymentStats
+export default PaymentStats;

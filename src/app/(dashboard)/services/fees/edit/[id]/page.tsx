@@ -1,73 +1,76 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import React, { useState, useEffect } from 'react';
+
+import { useParams, useRouter } from 'next/navigation';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import TextField from '@mui/material/TextField'
-import Alert from '@mui/material/Alert'
-import AlertTitle from '@mui/material/AlertTitle'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormHelperText from '@mui/material/FormHelperText'
-import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider'
-import CircularProgress from '@mui/material/CircularProgress'
-import Breadcrumbs from '@mui/material/Breadcrumbs'
-import Link from '@mui/material/Link'
-import LinearProgress from '@mui/material/LinearProgress'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import Chip from '@mui/material/Chip'
-import Table from '@mui/material/Table'
-import TableHead from '@mui/material/TableHead'
-import TableBody from '@mui/material/TableBody'
-import TableRow from '@mui/material/TableRow'
-import TableCell from '@mui/material/TableCell'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogActions from '@mui/material/DialogActions'
-import Skeleton from '@mui/material/Skeleton'
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import TextField from '@mui/material/TextField';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import type { SelectChangeEvent } from '@mui/material/Select';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormHelperText from '@mui/material/FormHelperText';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import CircularProgress from '@mui/material/CircularProgress';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Link from '@mui/material/Link';
+import LinearProgress from '@mui/material/LinearProgress';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Chip from '@mui/material/Chip';
+import Table from '@mui/material/Table';
+import TableHead from '@mui/material/TableHead';
+import TableBody from '@mui/material/TableBody';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
+import Skeleton from '@mui/material/Skeleton';
 
 // Redux Imports
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { FeeService, fetchServiceFees, updateServiceFee } from '@/store/slices/feesSlice'
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import type { FeeService } from '@/store/slices/feesSlice';
+import { fetchServiceFees, updateServiceFee } from '@/store/slices/feesSlice';
 
 // For accordion expansion icon
-const ExpandMoreIcon = () => <i className='ri ri-arrow-down-s-line' style={{ fontSize: 24 }}></i>
+const ExpandMoreIcon = () => <i className='ri ri-arrow-down-s-line' style={{ fontSize: 24 }}></i>;
 
 const EditFeeServicePage = () => {
-  const { id } = useParams()
-  const router = useRouter()
-  const dispatch = useAppDispatch()
-  const { serviceFees: fees, isLoading, error } = useAppSelector(state => state.fees)
+  const { id } = useParams();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { serviceFees: fees, isLoading, error } = useAppSelector(state => state.fees);
 
   const [formData, setFormData] = useState({
     name: '',
     type: 'standard'
-  })
+  });
 
   const [formErrors, setFormErrors] = useState({
     name: ''
-  })
+  });
 
-  const [tabValue, setTabValue] = useState(0)
-  const [successMessage, setSuccessMessage] = useState('')
-  const [fetchError, setFetchError] = useState<string>()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [originalFee, setOriginalFee] = useState<FeeService>()
+  const [tabValue, setTabValue] = useState(0);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [fetchError, setFetchError] = useState<string>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [originalFee, setOriginalFee] = useState<FeeService>();
 
   // Dialog for adding new service item
   const [serviceDialog, setServiceDialog] = useState({
@@ -83,7 +86,7 @@ const EditFeeServicePage = () => {
         payment_support: ['card', 'bank']
       }
     }
-  })
+  });
 
   // Edit service item dialog
   const [editServiceDialog, setEditServiceDialog] = useState<{
@@ -94,143 +97,152 @@ const EditFeeServicePage = () => {
     open: false,
     serviceId: '',
     serviceData: null
-  })
+  });
 
   // Delete confirmation dialog
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     serviceId: '',
     serviceName: ''
-  })
+  });
 
   useEffect(() => {
     if (id) {
-      const fee = fees.find(f => f.id === id)
+      const fee = fees.find(f => f.id === id);
+
       if (fee) {
-        setOriginalFee(fee)
+        setOriginalFee(fee);
         setFormData({
           name: fee.name,
           type: fee.type || 'standard'
-        })
+        });
       } else {
-        setFetchError('Fee service not found')
+        setFetchError('Fee service not found');
       }
     }
-  }, [id])
+  }, [id]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue)
-  }
+    setTabValue(newValue);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
+    }));
 
     // Clear validation error when user types
     if (formErrors[name as keyof typeof formErrors]) {
       setFormErrors(prev => ({
         ...prev,
         [name]: ''
-      }))
+      }));
     }
-  }
+  };
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
+    }));
 
     // Clear validation error when user types
     if (formErrors[name as keyof typeof formErrors]) {
       setFormErrors(prev => ({
         ...prev,
         [name]: ''
-      }))
+      }));
     }
-  }
+  };
 
   const validateForm = () => {
-    const errors: { name: string } = { name: '' }
-    let isValid = true
+    const errors: { name: string } = { name: '' };
+    let isValid = true;
 
     if (!formData.name.trim()) {
-      errors.name = 'Fee service name is required'
-      isValid = false
+      errors.name = 'Fee service name is required';
+      isValid = false;
     }
 
-    setFormErrors(errors)
-    return isValid
-  }
+    setFormErrors(errors);
+
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
+
     try {
-      await dispatch(updateServiceFee({ id: id as string, feeData: formData })).unwrap()
-      setSuccessMessage('Fee service updated successfully')
+      await dispatch(updateServiceFee({ id: id as string, feeData: formData })).unwrap();
+      setSuccessMessage('Fee service updated successfully');
 
       // Reset form submission state
       setTimeout(() => {
-        setSuccessMessage('')
-      }, 3000)
+        setSuccessMessage('');
+      }, 3000);
     } catch (err) {
-      console.error('Failed to update fee service:', err)
+      console.error('Failed to update fee service:', err);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    router.back()
-  }
+    router.back();
+  };
 
   const handleOpenServiceDialog = () => {
     setServiceDialog({
       ...serviceDialog,
       open: true
-    })
-  }
+    });
+  };
 
   const handleCloseServiceDialog = () => {
     setServiceDialog({
       ...serviceDialog,
       open: false
-    })
-  }
+    });
+  };
 
   const handleServiceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     setServiceDialog(prev => ({
       ...prev,
       serviceData: {
         ...prev.serviceData,
         [name]: value
       }
-    }))
-  }
+    }));
+  };
+
   const handleServiceSelectChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     setServiceDialog(prev => ({
       ...prev,
       serviceData: {
         ...prev.serviceData,
         [name]: value
       }
-    }))
-  }
+    }));
+  };
 
   const handleServiceMetadataChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     setServiceDialog(prev => ({
       ...prev,
       serviceData: {
@@ -240,83 +252,84 @@ const EditFeeServicePage = () => {
           [name]: value
         }
       }
-    }))
-  }
+    }));
+  };
 
   const handleAddService = () => {
     // Here you would implement adding a service item to the fee service
     // For now, we'll just close the dialog
-    handleCloseServiceDialog()
-  }
+    handleCloseServiceDialog();
+  };
 
   const handleOpenEditServiceDialog = (serviceId: string) => {
-    const serviceToEdit = originalFee?.services.find(s => s.id === serviceId)
+    const serviceToEdit = originalFee?.services.find(s => s.id === serviceId);
+
     if (serviceToEdit) {
       setEditServiceDialog({
         open: true,
         serviceId,
         serviceData: { ...serviceToEdit }
-      })
+      });
     }
-  }
+  };
 
   const handleCloseEditServiceDialog = () => {
     setEditServiceDialog({
       open: false,
       serviceId: '',
       serviceData: null
-    })
-  }
+    });
+  };
 
   const handleUpdateService = () => {
     // Here you would implement updating a service item
     // For now, we'll just close the dialog
-    handleCloseEditServiceDialog()
-  }
+    handleCloseEditServiceDialog();
+  };
 
   const openDeleteDialog = (serviceId: string, serviceName: string) => {
     setDeleteDialog({
       open: true,
       serviceId,
       serviceName
-    })
-  }
+    });
+  };
 
   const closeDeleteDialog = () => {
     setDeleteDialog({
       open: false,
       serviceId: '',
       serviceName: ''
-    })
-  }
+    });
+  };
 
   const confirmDelete = () => {
     // Here you would implement the delete service item functionality
     // For now, we'll just close the dialog
-    closeDeleteDialog()
-  }
+    closeDeleteDialog();
+  };
 
   const getStatusColor = (status: number) => {
     switch (status) {
       case 1:
-        return 'success'
+        return 'success';
       case 0:
-        return 'warning'
+        return 'warning';
       default:
-        return 'error'
+        return 'error';
     }
-  }
+  };
 
   const getStatusLabel = (status: number) => {
     switch (status) {
       case 1:
-        return 'Active'
+        return 'Active';
       case 0:
-        return 'Inactive'
+        return 'Inactive';
       default:
-        return 'Disabled'
+        return 'Disabled';
     }
-  }
+  };
 
   // Loading skeleton
   if (isLoading && !originalFee) {
@@ -345,7 +358,7 @@ const EditFeeServicePage = () => {
           </Card>
         </Grid>
       </Grid>
-    )
+    );
   }
 
   // Error state
@@ -367,7 +380,7 @@ const EditFeeServicePage = () => {
           </Alert>
         </Grid>
       </Grid>
-    )
+    );
   }
 
   return (
@@ -724,7 +737,7 @@ const EditFeeServicePage = () => {
         </DialogActions>
       </Dialog>
     </Grid>
-  )
-}
+  );
+};
 
-export default EditFeeServicePage
+export default EditFeeServicePage;

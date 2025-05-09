@@ -1,24 +1,25 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
+import { useState } from 'react';
 
 // MUI Components
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Grid from '@mui/material/Grid'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import Alert from '@mui/material/Alert'
-import CircularProgress from '@mui/material/CircularProgress'
-import Box from '@mui/material/Box'
-import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
-import InputLabel from '@mui/material/InputLabel'
-import FormControl from '@mui/material/FormControl'
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
 
-import { addUser } from '@/store/slices/userSlice'
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+
+import { addUser } from '@/store/slices/userSlice';
 
 interface UserFormData {
   full_name: string
@@ -30,8 +31,8 @@ interface UserFormData {
 }
 
 const AddUser = () => {
-  const dispatch = useAppDispatch()
-  const { isLoading, error } = useAppSelector(state => state.users)
+  const dispatch = useAppDispatch();
+  const { isLoading, error } = useAppSelector(state => state.users);
 
   const [formData, setFormData] = useState<UserFormData>({
     full_name: '',
@@ -40,27 +41,28 @@ const AddUser = () => {
     role: 'user',
     password: '',
     password_confirmation: ''
-  })
+  });
 
-  const [success, setSuccess] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
-    const { name, value } = e.target as { name: string; value: string }
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target as { name: string; value: string };
+
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Validate form
     if (formData.password !== formData.password_confirmation) {
       // Handle password mismatch error
-      return
+      return;
     }
 
     try {
-      await dispatch(addUser(formData)).unwrap()
-      setSuccess('User added successfully')
+      await dispatch(addUser(formData)).unwrap();
+      setSuccess('User added successfully');
 
       // Reset form
       setFormData({
@@ -70,16 +72,16 @@ const AddUser = () => {
         role: 'user',
         password: '',
         password_confirmation: ''
-      })
+      });
 
       // Clear success message after 3 seconds
       setTimeout(() => {
-        setSuccess(null)
-      }, 3000)
+        setSuccess(null);
+      }, 3000);
     } catch (err) {
       // Error is handled by the reducer
     }
-  }
+  };
 
   return (
     <Grid container spacing={6}>
@@ -191,7 +193,7 @@ const AddUser = () => {
         </Card>
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
-export default AddUser
+export default AddUser;

@@ -1,73 +1,76 @@
-'use client'
+'use client';
 
 // React Imports
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
 // Next Imports
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Table from '@mui/material/Table'
-import Button from '@mui/material/Button'
-import TableRow from '@mui/material/TableRow'
-import TableHead from '@mui/material/TableHead'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import CardHeader from '@mui/material/CardHeader'
-import TableContainer from '@mui/material/TableContainer'
-import LinearProgress from '@mui/material/LinearProgress'
-import CardContent from '@mui/material/CardContent'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Alert from '@mui/material/Alert'
-import Chip from '@mui/material/Chip'
-import Tooltip from '@mui/material/Tooltip'
-import TablePagination from '@mui/material/TablePagination'
-import Snackbar from '@mui/material/Snackbar'
-import InputAdornment from '@mui/material/InputAdornment'
-import TextField from '@mui/material/TextField'
-import CircularProgress from '@mui/material/CircularProgress'
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import TableRow from '@mui/material/TableRow';
+import TableHead from '@mui/material/TableHead';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import CardHeader from '@mui/material/CardHeader';
+import TableContainer from '@mui/material/TableContainer';
+import LinearProgress from '@mui/material/LinearProgress';
+import CardContent from '@mui/material/CardContent';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Alert from '@mui/material/Alert';
+import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
+import TablePagination from '@mui/material/TablePagination';
+import Snackbar from '@mui/material/Snackbar';
+import InputAdornment from '@mui/material/InputAdornment';
+import TextField from '@mui/material/TextField';
+import CircularProgress from '@mui/material/CircularProgress';
 
 // Redux Imports
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { fetchServiceTaxes, deleteServiceTax, clearTaxError } from '@/store/slices/taxesSlice'
-import { Box } from '@mui/material'
+import { Box } from '@mui/material';
+
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { fetchServiceTaxes, deleteServiceTax, clearTaxError } from '@/store/slices/taxesSlice';
 
 const TaxesServices = () => {
-  const router = useRouter()
-  const dispatch = useAppDispatch()
-  const { serviceTaxes: taxes, isLoading, error } = useAppSelector(state => state.taxes)
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { serviceTaxes: taxes, isLoading, error } = useAppSelector(state => state.taxes);
 
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; id: string | null }>({
     open: false,
     id: null
-  })
+  });
+
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
     severity: 'success'
-  })
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(10)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filteredTaxes, setFilteredTaxes] = useState(taxes || [])
+  });
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredTaxes, setFilteredTaxes] = useState(taxes || []);
 
   // Fetch tax data on component mount
   useEffect(() => {
-    dispatch(fetchServiceTaxes())
+    dispatch(fetchServiceTaxes());
 
     // Clear any errors when unmounting
     return () => {
-      dispatch(clearTaxError())
-    }
-  }, [dispatch])
+      dispatch(clearTaxError());
+    };
+  }, [dispatch]);
 
   // Filter taxes when search query or taxes change
   useEffect(() => {
@@ -77,61 +80,62 @@ const TaxesServices = () => {
           tax.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           tax.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
           tax.type.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      setFilteredTaxes(filtered)
-      setPage(0) // Reset to first page when filtering
+      );
+
+      setFilteredTaxes(filtered);
+      setPage(0); // Reset to first page when filtering
     }
-  }, [searchQuery, taxes])
+  }, [searchQuery, taxes]);
 
   const handleOpenDeleteDialog = (id: string) => {
-    setDeleteDialog({ open: true, id })
-  }
+    setDeleteDialog({ open: true, id });
+  };
 
   const handleCloseDeleteDialog = () => {
-    setDeleteDialog({ open: false, id: null })
-  }
+    setDeleteDialog({ open: false, id: null });
+  };
 
   const handleDelete = async () => {
     if (deleteDialog.id) {
-      const result = await dispatch(deleteServiceTax(deleteDialog.id))
+      const result = await dispatch(deleteServiceTax(deleteDialog.id));
 
       if (deleteServiceTax.fulfilled.match(result)) {
         setSnackbar({
           open: true,
           message: 'Tax service deleted successfully',
           severity: 'success'
-        })
+        });
       } else {
         setSnackbar({
           open: true,
           message: (result.payload as string) || 'Failed to delete tax service',
           severity: 'error'
-        })
+        });
       }
 
-      handleCloseDeleteDialog()
+      handleCloseDeleteDialog();
     }
-  }
+  };
 
   const handleRefresh = () => {
-    dispatch(fetchServiceTaxes())
-  }
+    dispatch(fetchServiceTaxes());
+  };
 
   const handleChangePage = (_event: unknown, newPage: number) => {
-    setPage(newPage)
-  }
+    setPage(newPage);
+  };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
-  }
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false })
-  }
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   // Calculate pagination
-  const paginatedTaxes = filteredTaxes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  const paginatedTaxes = filteredTaxes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <Grid container spacing={6}>
@@ -303,7 +307,7 @@ const TaxesServices = () => {
         </Alert>
       </Snackbar>
     </Grid>
-  )
-}
+  );
+};
 
-export default TaxesServices
+export default TaxesServices;

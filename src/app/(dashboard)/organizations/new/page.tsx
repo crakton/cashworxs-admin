@@ -1,10 +1,11 @@
-'use client'
+'use client';
 
 // Components
-import OrganizationForm from '@/components/layout/shared/OrganizationForm'
+import { Breadcrumbs, Link, Typography } from '@mui/material';
+
+import OrganizationForm from '@/components/layout/shared/OrganizationForm';
 
 // MUI Imports
-import { Breadcrumbs, Link, Typography } from '@mui/material'
 
 const CreateOrganizationPage = () => {
   return (
@@ -21,7 +22,7 @@ const CreateOrganizationPage = () => {
 
       <OrganizationForm />
     </>
-  )
-}
+  );
+};
 
-export default CreateOrganizationPage
+export default CreateOrganizationPage;

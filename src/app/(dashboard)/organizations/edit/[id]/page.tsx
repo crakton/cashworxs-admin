@@ -1,17 +1,18 @@
-'use client'
+'use client';
 
-import { useParams } from 'next/navigation'
+import { useParams } from 'next/navigation';
 
 // Components
-import OrganizationForm from '@/components/layout/shared/OrganizationForm'
+import { Breadcrumbs, Link, Typography } from '@mui/material';
+
+import OrganizationForm from '@/components/layout/shared/OrganizationForm';
 
 // MUI Imports
-import { Breadcrumbs, Link, Typography } from '@mui/material'
 
 const EditOrganizationPage = () => {
   // Get the organization ID from the URL parameters
-  const params = useParams()
-  const organizationId = params.id as string
+  const params = useParams();
+  const organizationId = params.id as string;
 
   return (
     <>
@@ -26,7 +27,7 @@ const EditOrganizationPage = () => {
       </Breadcrumbs>
       <OrganizationForm isEdit={true} organizationId={organizationId} />
     </>
-  )
-}
+  );
+};
 
-export default EditOrganizationPage
+export default EditOrganizationPage;

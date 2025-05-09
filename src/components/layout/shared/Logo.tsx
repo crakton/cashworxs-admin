@@ -1,20 +1,21 @@
-'use client'
+'use client';
 
 // React Imports
-import type { CSSProperties } from 'react'
+import type { CSSProperties } from 'react';
 
 // Third-party Imports
-import styled from '@emotion/styled'
+import Image from 'next/image';
+
+import styled from '@emotion/styled';
 
 // Component Imports
-import Image from 'next/image'
 
 // Config Imports
-import themeConfig from '@configs/themeConfig'
+import themeConfig from '@configs/themeConfig';
 
 type LogoTextProps = {
   color?: CSSProperties['color']
-}
+};
 
 const LogoText = styled.span<LogoTextProps>`
   color: ${({ color }) => color ?? 'var(--mui-palette-text-primary)'};
@@ -24,7 +25,7 @@ const LogoText = styled.span<LogoTextProps>`
   letter-spacing: 0.15px;
   text-transform: uppercase;
   margin-inline-start: 10px;
-`
+`;
 
 const Logo = ({ color }: { color?: CSSProperties['color'] }) => {
   return (
@@ -32,7 +33,7 @@ const Logo = ({ color }: { color?: CSSProperties['color'] }) => {
       <Image src={'/images/logos/logo-original.png'} alt={'Logo'} width={24} height={24} />
       <LogoText color={color}>{themeConfig.templateName}</LogoText>
     </div>
-  )
-}
+  );
+};
 
-export default Logo
+export default Logo;

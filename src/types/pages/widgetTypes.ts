@@ -1,7 +1,7 @@
 // Type Imports
-import type { ThemeColor } from '@core/types'
-import type { OptionsMenuType } from '@core/components/option-menu/types'
-import type { CustomAvatarProps } from '@core/components/mui/Avatar'
+import type { ThemeColor } from '@core/types';
+import type { OptionsMenuType } from '@core/components/option-menu/types';
+import type { CustomAvatarProps } from '@core/components/mui/Avatar';
 
 export type CardStatsVerticalProps = {
   title: string
@@ -14,4 +14,4 @@ export type CardStatsVerticalProps = {
   avatarSkin?: CustomAvatarProps['skin']
   avatarSize?: number
   moreOptions?: OptionsMenuType
-}
+};

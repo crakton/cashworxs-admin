@@ -1,36 +1,38 @@
-'use client'
+'use client';
 
-import Cookies from 'js-cookie'
-import { useState, useEffect } from 'react'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
+import { useState, useEffect } from 'react';
+
+import Cookies from 'js-cookie';
 
 // MUI Components
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Grid from '@mui/material/Grid'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import Alert from '@mui/material/Alert'
-import CircularProgress from '@mui/material/CircularProgress'
-import Box from '@mui/material/Box'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
-import IconButton from '@mui/material/IconButton'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogTitle from '@mui/material/DialogTitle'
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 
 // Redux actions
-import { fetchOnboardingData, updateOnboardingItem, addOnboardingItem } from '@/store/slices/onboardingSlice'
-import axios from 'axios'
+import axios from 'axios';
+
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { fetchOnboardingData, updateOnboardingItem, addOnboardingItem } from '@/store/slices/onboardingSlice';
 
 interface OnboardingItem {
   id?: string
@@ -40,109 +42,111 @@ interface OnboardingItem {
 }
 
 const OnboardingAdmin = () => {
-  const dispatch = useAppDispatch()
-  const { onboardingData, isLoading, error } = useAppSelector(state => state.onboarding)
+  const dispatch = useAppDispatch();
+  const { onboardingData, isLoading, error } = useAppSelector(state => state.onboarding);
 
-  const [items, setItems] = useState<OnboardingItem[]>([])
-  const [openDialog, setOpenDialog] = useState(false)
-  const [previewDialog, setPreviewDialog] = useState(false)
-  const [currentItem, setCurrentItem] = useState<OnboardingItem | null>(null)
-  const [uploadingImage, setUploadingImage] = useState(false)
+  const [items, setItems] = useState<OnboardingItem[]>([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [previewDialog, setPreviewDialog] = useState(false);
+  const [currentItem, setCurrentItem] = useState<OnboardingItem | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // For new items
-  const [isNewItem, setIsNewItem] = useState(false)
+  const [isNewItem, setIsNewItem] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchOnboardingData())
-  }, [dispatch])
+    dispatch(fetchOnboardingData());
+  }, [dispatch]);
 
   useEffect(() => {
     if (onboardingData && Array.isArray(onboardingData)) {
-      setItems(onboardingData)
+      setItems(onboardingData);
     }
-  }, [onboardingData])
+  }, [onboardingData]);
 
   const handleEditClick = (item: OnboardingItem) => {
-    setCurrentItem(item)
-    setIsNewItem(false)
-    setOpenDialog(true)
-  }
+    setCurrentItem(item);
+    setIsNewItem(false);
+    setOpenDialog(true);
+  };
 
   const handlePreviewClick = (item: OnboardingItem) => {
-    setCurrentItem(item)
-    setPreviewDialog(true)
-  }
+    setCurrentItem(item);
+    setPreviewDialog(true);
+  };
 
   const handleAddNewClick = () => {
     setCurrentItem({
       title: '',
       description: '',
       image_url: ''
-    })
-    setIsNewItem(true)
-    setOpenDialog(true)
-  }
+    });
+    setIsNewItem(true);
+    setOpenDialog(true);
+  };
 
   const handleCloseDialog = () => {
-    setOpenDialog(false)
-    setPreviewDialog(false)
-    setCurrentItem(null)
-  }
+    setOpenDialog(false);
+    setPreviewDialog(false);
+    setCurrentItem(null);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     console.log('Input changed:', name, value);
-    
+
     if (currentItem) {
       setCurrentItem({
         ...currentItem,
         [name]: value
-      })
+      });
     }
-  }
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return
+    if (!e.target.files || e.target.files.length === 0) return;
 
-    const file = e.target.files[0]
+    const file = e.target.files[0];
 
-    setUploadingImage(true)
+    setUploadingImage(true);
 
     try {
-      const formData = new FormData()
-      formData.append('image', file)
+      const formData = new FormData();
+
+      formData.append('image', file);
 
       // Replace with your actual upload endpoint
-      const token = Cookies.get('auth_token')
+      const token = Cookies.get('auth_token');
+
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/upload-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`
         }
-      })
+      });
 
       if (currentItem && response.data.url) {
         setCurrentItem({
           ...currentItem,
           image_url: response.data.url
-        })
+        });
       }
     } catch (error) {
-      console.error('Error uploading image:', error)
+      console.error('Error uploading image:', error);
+
       // Handle error here
     } finally {
-      setUploadingImage(false)
+      setUploadingImage(false);
     }
-  }
+  };
 
   const handleSaveItem = async () => {
-
     try {
-    
-    if (!currentItem) return
+      if (!currentItem) return;
+
       if (isNewItem) {
-        
-        await dispatch(addOnboardingItem(currentItem)).unwrap()
+        await dispatch(addOnboardingItem(currentItem)).unwrap();
       } else if (currentItem.id) {
         console.log('Updating item:', currentItem);
         await dispatch(
@@ -150,23 +154,24 @@ const OnboardingAdmin = () => {
             id: currentItem.id,
             data: currentItem
           })
-        ).unwrap()
+        ).unwrap();
       }
 
-      handleCloseDialog()
-      dispatch(fetchOnboardingData())
+      handleCloseDialog();
+      dispatch(fetchOnboardingData());
     } catch (error) {
-      console.error('Error saving item:', error)
+      console.error('Error saving item:', error);
+
       // Error is handled by the reducer
     }
-  }
+  };
 
   if (isLoading && !items.length) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
         <CircularProgress />
       </Box>
-    )
+    );
   }
 
   return (
@@ -363,8 +368,8 @@ const OnboardingAdmin = () => {
           {currentItem && (
             <Button
               onClick={() => {
-                handleCloseDialog()
-                handleEditClick(currentItem)
+                handleCloseDialog();
+                handleEditClick(currentItem);
               }}
               color='primary'
             >
@@ -374,7 +379,7 @@ const OnboardingAdmin = () => {
         </DialogActions>
       </Dialog>
     </Grid>
-  )
-}
+  );
+};
 
-export default OnboardingAdmin
+export default OnboardingAdmin;

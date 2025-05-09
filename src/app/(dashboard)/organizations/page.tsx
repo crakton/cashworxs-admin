@@ -1,6 +1,6 @@
 // Views
-import OrganizationsList from '@/views/OrganizationsList'
+import OrganizationsList from '@/views/OrganizationsList';
 
 export default function OrganizationsPage() {
-  return <OrganizationsList />
+  return <OrganizationsList />;
 }

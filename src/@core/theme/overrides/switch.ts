@@ -1,5 +1,5 @@
 // MUI Imports
-import type { Theme } from '@mui/material/styles'
+import type { Theme } from '@mui/material/styles';
 
 const switchOverrides: Theme['components'] = {
   MuiSwitch: {
@@ -64,6 +64,6 @@ const switchOverrides: Theme['components'] = {
       }
     }
   }
-}
+};
 
-export default switchOverrides
+export default switchOverrides;

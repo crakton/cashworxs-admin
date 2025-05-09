@@ -1,24 +1,24 @@
-'use client'
+'use client';
 
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Grid from '@mui/material/Grid'
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
 
 // Components Imports
-import OptionMenu from '@core/components/option-menu'
-import CustomAvatar from '@core/components/mui/Avatar'
+import OptionMenu from '@core/components/option-menu';
+import CustomAvatar from '@core/components/mui/Avatar';
 
 // Type Imports
-import type { ThemeColor } from '@core/types'
+import type { ThemeColor } from '@core/types';
 
 type DataType = {
   icon: string
   stats: string | number
   title: string
   color: ThemeColor
-}
+};
 
 const MetricsOverview = ({ dashboardData }) => {
   // Format metrics data
@@ -53,7 +53,7 @@ const MetricsOverview = ({ dashboardData }) => {
       title: 'Service Taxes',
       icon: 'ri-file-list-3-line'
     }
-  ]
+  ];
 
   return (
     <Card className='bs-full'>
@@ -85,7 +85,7 @@ const MetricsOverview = ({ dashboardData }) => {
         </Grid>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default MetricsOverview
+export default MetricsOverview;

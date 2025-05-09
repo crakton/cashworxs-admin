@@ -1,72 +1,75 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useEffect, useState } from 'react';
+
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Table from '@mui/material/Table'
-import Button from '@mui/material/Button'
-import TableRow from '@mui/material/TableRow'
-import TableHead from '@mui/material/TableHead'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import CardHeader from '@mui/material/CardHeader'
-import TableContainer from '@mui/material/TableContainer'
-import LinearProgress from '@mui/material/LinearProgress'
-import CardContent from '@mui/material/CardContent'
-import Alert from '@mui/material/Alert'
-import AlertTitle from '@mui/material/AlertTitle'
-import Chip from '@mui/material/Chip'
-import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider'
-import Paper from '@mui/material/Paper'
-import Skeleton from '@mui/material/Skeleton'
-import Tooltip from '@mui/material/Tooltip'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import TableRow from '@mui/material/TableRow';
+import TableHead from '@mui/material/TableHead';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import CardHeader from '@mui/material/CardHeader';
+import TableContainer from '@mui/material/TableContainer';
+import LinearProgress from '@mui/material/LinearProgress';
+import CardContent from '@mui/material/CardContent';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import Chip from '@mui/material/Chip';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import Paper from '@mui/material/Paper';
+import Skeleton from '@mui/material/Skeleton';
+import Tooltip from '@mui/material/Tooltip';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 // Redux Imports
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { fetchServiceFees, deleteServiceFee, FeeService } from '@/store/slices/feesSlice'
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import type { FeeService } from '@/store/slices/feesSlice';
+import { fetchServiceFees, deleteServiceFee } from '@/store/slices/feesSlice';
 
 const FeeDetailsPage = () => {
-  const { id } = useParams()
-  const router = useRouter()
-  const dispatch = useAppDispatch()
-  const { serviceFees: fees, isLoading, error } = useAppSelector(state => state.fees)
+  const { id } = useParams();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { serviceFees: fees, isLoading, error } = useAppSelector(state => state.fees);
 
-  const [feeDetails, setFeeDetails] = useState<FeeService>()
-  const [fetchError, setFetchError] = useState<string>()
+  const [feeDetails, setFeeDetails] = useState<FeeService>();
+  const [fetchError, setFetchError] = useState<string>();
 
   // Delete confirmation dialog
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     serviceId: '',
     serviceName: ''
-  })
+  });
 
   useEffect(() => {
     if (id) {
-      const fee = fees.find(f => f.id === id)
+      const fee = fees.find(f => f.id === id);
+
       if (fee) {
-        setFeeDetails(fee)
+        setFeeDetails(fee);
       } else {
-        setFetchError('Fee service not found')
+        setFetchError('Fee service not found');
       }
     }
-  }, [id])
+  }, [id]);
 
   const handleGoBack = () => {
-    router.back()
-  }
+    router.back();
+  };
 
   // Delete service item dialog handlers
   const openDeleteDialog = (serviceId: string, serviceName: string) => {
@@ -74,44 +77,44 @@ const FeeDetailsPage = () => {
       open: true,
       serviceId,
       serviceName
-    })
-  }
+    });
+  };
 
   const closeDeleteDialog = () => {
     setDeleteDialog({
       open: false,
       serviceId: '',
       serviceName: ''
-    })
-  }
+    });
+  };
 
   const confirmDelete = () => {
     // Here you would implement the delete service item functionality
     // For now, we'll just close the dialog
-    closeDeleteDialog()
-  }
+    closeDeleteDialog();
+  };
 
   const getStatusColor = (status: number) => {
     switch (status) {
       case 1:
-        return 'success'
+        return 'success';
       case 0:
-        return 'warning'
+        return 'warning';
       default:
-        return 'error'
+        return 'error';
     }
-  }
+  };
 
   const getStatusLabel = (status: number) => {
     switch (status) {
       case 1:
-        return 'Active'
+        return 'Active';
       case 0:
-        return 'Inactive'
+        return 'Inactive';
       default:
-        return 'Disabled'
+        return 'Disabled';
     }
-  }
+  };
 
   // Loading skeleton
   if (isLoading) {
@@ -144,7 +147,7 @@ const FeeDetailsPage = () => {
           </Card>
         </Grid>
       </Grid>
-    )
+    );
   }
 
   // Error state
@@ -166,7 +169,7 @@ const FeeDetailsPage = () => {
           </Alert>
         </Grid>
       </Grid>
-    )
+    );
   }
 
   return (
@@ -326,7 +329,7 @@ const FeeDetailsPage = () => {
         </DialogActions>
       </Dialog>
     </Grid>
-  )
-}
+  );
+};
 
-export default FeeDetailsPage
+export default FeeDetailsPage;

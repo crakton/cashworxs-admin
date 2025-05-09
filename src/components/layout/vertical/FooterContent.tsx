@@ -1,20 +1,20 @@
-'use client'
+'use client';
 
 // Next Imports
-import Link from 'next/link'
+import Link from 'next/link';
 
 // Third-party Imports
-import classnames from 'classnames'
+import classnames from 'classnames';
 
 // Hook Imports
-import useVerticalNav from '@menu/hooks/useVerticalNav'
+import useVerticalNav from '@menu/hooks/useVerticalNav';
 
 // Util Imports
-import { verticalLayoutClasses } from '@layouts/utils/layoutClasses'
+import { verticalLayoutClasses } from '@layouts/utils/layoutClasses';
 
 const FooterContent = () => {
   // Hooks
-  const { isBreakpointReached } = useVerticalNav()
+  const { isBreakpointReached } = useVerticalNav();
 
   return (
     <div
@@ -29,7 +29,7 @@ const FooterContent = () => {
         </Link>
       </p>
     </div>
-  )
-}
+  );
+};
 
-export default FooterContent
+export default FooterContent;

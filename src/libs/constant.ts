@@ -1,8 +1,8 @@
 // Payment support options
-export const paymentSupportOptions = ['Bank Transfer', 'Card Payment', 'USSD', 'POS', 'Cash', 'Mobile Money']
+export const paymentSupportOptions = ['Bank Transfer', 'Card Payment', 'USSD', 'POS', 'Cash', 'Mobile Money'];
 
 // Payment type options
-export const paymentTypeOptions = ['One-time', 'Recurring', 'Monthly', 'Quarterly', 'Annually']
+export const paymentTypeOptions = ['One-time', 'Recurring', 'Monthly', 'Quarterly', 'Annually'];
 
 // States in Nigeria
 export const nigerianStates = [
@@ -44,7 +44,7 @@ export const nigerianStates = [
   'Taraba',
   'Yobe',
   'Zamfara'
-]
+];
 
 // Tax types
 export const taxTypes = [
@@ -61,7 +61,7 @@ export const taxTypes = [
   'Capital Gains Tax',
   'Withholding Tax',
   'Other'
-]
+];
 
 // Service types
 export const serviceTypes = [
@@ -73,7 +73,7 @@ export const serviceTypes = [
   'Tax',
   'Fee',
   'Other'
-]
+];
 
 // Organization types
-export const organizationTypes = ['Government', 'Private', 'NGO', 'International']
+export const organizationTypes = ['Government', 'Private', 'NGO', 'International'];

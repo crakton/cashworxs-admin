@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { fetchSingleTax, deleteServiceTax } from '@/store/slices/taxesSlice'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react';
+
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 import {
   Card,
   CardHeader,
@@ -22,89 +22,93 @@ import {
   DialogActions,
   Alert,
   Snackbar
-} from '@mui/material'
-import { useState } from 'react'
+} from '@mui/material';
+
+import { fetchSingleTax, deleteServiceTax } from '@/store/slices/taxesSlice';
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
 
 const ViewTaxPage = ({ params }: { params: { id: string } }) => {
-  const router = useRouter()
-  const dispatch = useAppDispatch()
-  const { currentTax, isLoading, error } = useAppSelector(state => state.taxes)
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { currentTax, isLoading, error } = useAppSelector(state => state.taxes);
 
-  const [deleteDialog, setDeleteDialog] = useState<boolean>(false)
-  const [isDeleting, setIsDeleting] = useState<boolean>(false)
+  const [deleteDialog, setDeleteDialog] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
     severity: 'success'
-  })
+  });
 
   useEffect(() => {
     if (params.id) {
-      dispatch(fetchSingleTax(params.id))
+      dispatch(fetchSingleTax(params.id));
     }
-  }, [dispatch, params.id])
+  }, [dispatch, params.id]);
 
   const handleOpenDeleteDialog = () => {
-    setDeleteDialog(true)
-  }
+    setDeleteDialog(true);
+  };
 
   const handleCloseDeleteDialog = () => {
-    setDeleteDialog(false)
-  }
+    setDeleteDialog(false);
+  };
 
   const handleDelete = async () => {
     if (params.id) {
-      setIsDeleting(true)
-      const result = await dispatch(deleteServiceTax(params.id))
+      setIsDeleting(true);
+      const result = await dispatch(deleteServiceTax(params.id));
 
       if (deleteServiceTax.fulfilled.match(result)) {
         setSnackbar({
           open: true,
           message: 'Tax service deleted successfully',
           severity: 'success'
-        })
+        });
 
         // Navigate back to taxes list after short delay
         setTimeout(() => {
-          router.push('/services/taxes')
-        }, 1500)
+          router.push('/services/taxes');
+        }, 1500);
       } else {
         setSnackbar({
           open: true,
           message: (result.payload as string) || 'Failed to delete tax service',
           severity: 'error'
-        })
+        });
       }
 
-      setIsDeleting(false)
-      handleCloseDeleteDialog()
+      setIsDeleting(false);
+      handleCloseDeleteDialog();
     }
-  }
+  };
 
   const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false })
-  }
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
         <CircularProgress />
       </Box>
-    )
+    );
   }
 
   if (error) {
-    return <Alert severity='error'>{error}</Alert>
+    return <Alert severity='error'>{error}</Alert>;
   }
 
   if (!currentTax) {
-    return <Typography>Tax not found</Typography>
+    return <Typography>Tax not found</Typography>;
   }
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'
-    return new Date(dateString).toLocaleString()
-  }
+    if (!dateString) return 'N/A';
+
+    return new Date(dateString).toLocaleString();
+  };
 
   return (
     <Grid container spacing={6}>
@@ -290,7 +294,7 @@ const ViewTaxPage = ({ params }: { params: { id: string } }) => {
         </Alert>
       </Snackbar>
     </Grid>
-  )
-}
+  );
+};
 
-export default ViewTaxPage
+export default ViewTaxPage;

@@ -1,57 +1,60 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
+import { useState, useEffect, useCallback } from 'react';
+
+import { useRouter } from 'next/navigation';
+
+// MUI Imports
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormHelperText from '@mui/material/FormHelperText';
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import LinearProgress from '@mui/material/LinearProgress';
+import Divider from '@mui/material/Divider';
+import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
+
+// Form validation
+import * as yup from 'yup';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+
 import {
   createOrganization,
   updateOrganization,
   fetchOrganizationById,
-  clearError,
-  Organization
-} from '@/store/slices/organizationsSlice'
+  clearError
+} from '@/store/slices/organizationsSlice';
+import type { Organization } from '@/store/slices/organizationsSlice';
 
-// MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormHelperText from '@mui/material/FormHelperText'
-import Alert from '@mui/material/Alert'
-import Snackbar from '@mui/material/Snackbar'
-import CircularProgress from '@mui/material/CircularProgress'
-import Box from '@mui/material/Box'
-import LinearProgress from '@mui/material/LinearProgress'
-import Divider from '@mui/material/Divider'
-import Chip from '@mui/material/Chip'
-import IconButton from '@mui/material/IconButton'
-import Paper from '@mui/material/Paper'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogTitle from '@mui/material/DialogTitle'
-import Switch from '@mui/material/Switch'
-import FormControlLabel from '@mui/material/FormControlLabel'
-
-// Form validation
-import * as yup from 'yup'
-import { useForm, Controller, useFieldArray } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import { FeeService } from '@/store/slices/feesSlice'
-import { nigerianStates, paymentSupportOptions, organizationTypes, serviceTypes } from '@/libs/constant'
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import type { FeeService } from '@/store/slices/feesSlice';
+import { nigerianStates, paymentSupportOptions, organizationTypes, serviceTypes } from '@/libs/constant';
 
 interface OrganizationFormProps {
   isEdit?: boolean
@@ -79,7 +82,7 @@ const serviceSchema = yup.object().shape({
     })
     .nullable()
     .default({})
-})
+});
 
 // Organization validation schema
 const schema = yup.object().shape({
@@ -91,23 +94,23 @@ const schema = yup.object().shape({
 
   // Add a temporary service field for the add service dialog
   tempService: serviceSchema.nullable().default(null)
-})
+});
 
-type FormData = yup.InferType<typeof schema>
+type FormData = yup.InferType<typeof schema>;
 
 const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }: OrganizationFormProps) => {
-  const router = useRouter()
-  const dispatch = useAppDispatch()
-  const { isLoading, error, currentOrganization } = useAppSelector(state => state.organizations)
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { isLoading, error, currentOrganization } = useAppSelector(state => state.organizations);
 
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
     severity: 'success'
-  })
+  });
 
-  const [serviceDialogOpen, setServiceDialogOpen] = useState(false)
-  const [currentServiceIndex, setCurrentServiceIndex] = useState<number | null>(null)
+  const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
+  const [currentServiceIndex, setCurrentServiceIndex] = useState<number | null>(null);
 
   // Handle form validation
   const {
@@ -125,25 +128,25 @@ const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }:
       services: [],
       tempService: null // Add this
     }
-  })
+  });
 
   // Field array for services
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: 'services'
-  })
+  });
 
   // Fetch organization data if editing or previewing
   useEffect(() => {
     if ((isEdit || isPreview) && organizationId) {
-      dispatch(fetchOrganizationById(organizationId))
+      dispatch(fetchOrganizationById(organizationId));
     }
 
     // Clear any errors when unmounting
     return () => {
-      dispatch(clearError())
-    }
-  }, [dispatch, isEdit, isPreview, organizationId])
+      dispatch(clearError());
+    };
+  }, [dispatch, isEdit, isPreview, organizationId]);
 
   // Populate form when organization data is available
   useEffect(() => {
@@ -173,12 +176,12 @@ const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }:
             }
           }
         ]
-      })
+      });
     }
-  }, [currentOrganization, isEdit, isPreview, reset])
+  }, [currentOrganization, isEdit, isPreview, reset]);
 
   // Watch services to validate
-  const services = watch('services')
+  const services = watch('services');
 
   // Handle form submission
   const onSubmit = useCallback(
@@ -205,17 +208,17 @@ const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }:
               payment_support: service.metadata?.payment_support || []
             }
           })) as unknown as Partial<FeeService>[]
-        }
+        };
 
-        let result: any
+        let result: any;
 
         if (isEdit && organizationId) {
           // Update existing organization
           result = await dispatch(
             updateOrganization({ id: organizationId, data: organizationData as Partial<Organization> })
-          )
+          );
         } else {
-          result = await dispatch(createOrganization(organizationData))
+          result = await dispatch(createOrganization(organizationData));
         }
 
         if (createOrganization.fulfilled.match(result) || updateOrganization.fulfilled.match(result)) {
@@ -223,42 +226,42 @@ const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }:
             open: true,
             message: `Organization ${isEdit ? 'updated' : 'created'} successfully`,
             severity: 'success'
-          })
+          });
 
           // Navigate back to organizations list after short delay
           setTimeout(() => {
-            router.push('/organizations')
-          }, 1500)
+            router.push('/organizations');
+          }, 1500);
         } else {
           setSnackbar({
             open: true,
             message: (result?.payload as string) || `Failed to ${isEdit ? 'update' : 'create'} organization`,
             severity: 'error'
-          })
+          });
         }
       } catch (err: any) {
         setSnackbar({
           open: true,
           message: err.message || `An error occurred`,
           severity: 'error'
-        })
+        });
       }
     },
     [dispatch, isEdit, organizationId, router]
-  )
+  );
 
   const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false })
-  }
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   const handleServiceDialogOpen = useCallback(
     (index?: number) => {
       if (index !== undefined) {
         // Editing existing service
-        setCurrentServiceIndex(index)
+        setCurrentServiceIndex(index);
       } else {
         // Adding new service - prepare empty data but don't add to array yet
-        setCurrentServiceIndex(null)
+        setCurrentServiceIndex(null);
 
         // Just set temporary data for the form, don't update the fields array yet
         setValue('tempService', {
@@ -272,37 +275,40 @@ const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }:
             payment_type: '',
             payment_support: []
           }
-        })
+        });
       }
-      setServiceDialogOpen(true)
+
+      setServiceDialogOpen(true);
     },
     [setValue]
-  )
+  );
 
   const handleServiceDialogClose = useCallback(() => {
-    setServiceDialogOpen(false)
-    setCurrentServiceIndex(null)
-  }, [])
+    setServiceDialogOpen(false);
+    setCurrentServiceIndex(null);
+  }, []);
 
   // Handle service save
   const handleServiceSave = useCallback(() => {
     const serviceData =
       currentServiceIndex !== null
         ? watch(`services.${currentServiceIndex}`)
-        : watch(`services.${services?.length || 0}`)
+        : watch(`services.${services?.length || 0}`);
 
     if (currentServiceIndex !== null) {
       // Update existing service
-      update(currentServiceIndex, serviceData)
+      update(currentServiceIndex, serviceData);
     } else {
-      const newServiceData = watch('tempService')
+      const newServiceData = watch('tempService');
+
       if (newServiceData) {
-        append(newServiceData)
+        append(newServiceData);
       }
     }
 
-    handleServiceDialogClose()
-  }, [currentServiceIndex, services, append, update, watch])
+    handleServiceDialogClose();
+  }, [currentServiceIndex, services, append, update, watch]);
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -393,7 +399,7 @@ const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }:
                           variant='contained'
                           startIcon={<i className='ri ri-add' />}
                           onClick={() => {
-                            handleServiceDialogOpen()
+                            handleServiceDialogOpen();
                           }}
                         >
                           Add Service
@@ -697,7 +703,7 @@ const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }:
         </Alert>
       </Snackbar>
     </Grid>
-  )
-}
+  );
+};
 
-export default OrganizationForm
+export default OrganizationForm;

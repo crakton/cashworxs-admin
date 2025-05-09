@@ -1,38 +1,38 @@
-'use client'
+'use client';
 
 // React Imports
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 
 // MUI Imports
-import Grid from '@mui/material/Grid'
-import Alert from '@mui/material/Alert'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import LinearProgress from '@mui/material/LinearProgress'
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import LinearProgress from '@mui/material/LinearProgress';
 
 // Component Imports
-import PaymentsTable from '@views/payments/PaymentsTable'
+import PaymentsTable from '@views/payments/PaymentsTable';
 
 // Redux Imports
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { fetchAllPayments } from '@/store/slices/paymentsSlice'
-import PaymentOverview from '@/views/payments/PaymentOverview'
-import PaymentStats from '@/views/payments/PaymentStats'
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { fetchAllPayments } from '@/store/slices/paymentsSlice';
+import PaymentOverview from '@/views/payments/PaymentOverview';
+import PaymentStats from '@/views/payments/PaymentStats';
 
 const PaymentsPage = () => {
-  const dispatch = useAppDispatch()
-  const { payments, isLoading, error } = useAppSelector(state => state.payments)
+  const dispatch = useAppDispatch();
+  const { payments, isLoading, error } = useAppSelector(state => state.payments);
 
   useEffect(() => {
-    dispatch(fetchAllPayments())
-  }, [dispatch])
+    dispatch(fetchAllPayments());
+  }, [dispatch]);
 
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
         <LinearProgress sx={{ width: '50%' }} />
       </Box>
-    )
+    );
   }
 
   if (error) {
@@ -40,11 +40,11 @@ const PaymentsPage = () => {
       <Alert severity='error' sx={{ mb: 4 }}>
         {error}
       </Alert>
-    )
+    );
   }
 
   if (!payments || payments.length === 0) {
-    return <Alert severity='info'>No payments data available</Alert>
+    return <Alert severity='info'>No payments data available</Alert>;
   }
 
   return (
@@ -71,7 +71,7 @@ const PaymentsPage = () => {
         </Grid>
       </Grid>
     </>
-  )
-}
+  );
+};
 
-export default PaymentsPage
+export default PaymentsPage;

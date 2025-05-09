@@ -1,45 +1,44 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import {
-  createServiceTax,
-  updateServiceTax,
-  fetchSingleTax,
-  clearTaxError,
-  TaxService
-} from '@/store/slices/taxesSlice'
-import Cookies from 'js-cookie'
+import { useState, useEffect } from 'react';
+
+import { useRouter } from 'next/navigation';
+
+import Cookies from 'js-cookie';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormHelperText from '@mui/material/FormHelperText'
-import Alert from '@mui/material/Alert'
-import Snackbar from '@mui/material/Snackbar'
-import CircularProgress from '@mui/material/CircularProgress'
-import Switch from '@mui/material/Switch'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Divider from '@mui/material/Divider'
-import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormHelperText from '@mui/material/FormHelperText';
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
+import CircularProgress from '@mui/material/CircularProgress';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Divider from '@mui/material/Divider';
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
 
 // Form validation
-import * as yup from 'yup'
-import { useForm, Controller } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import { LinearProgress } from '@mui/material'
-import { taxTypes, nigerianStates, paymentSupportOptions, paymentTypeOptions } from '@/libs/constant'
+import * as yup from 'yup';
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { LinearProgress } from '@mui/material';
+
+import { createServiceTax, updateServiceTax, fetchSingleTax, clearTaxError } from '@/store/slices/taxesSlice';
+import type { TaxService } from '@/store/slices/taxesSlice';
+
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { taxTypes, nigerianStates, paymentSupportOptions, paymentTypeOptions } from '@/libs/constant';
 
 interface TaxFormProps {
   isEdit?: boolean
@@ -62,25 +61,25 @@ const schema = yup.object().shape({
       payment_type: yup.string()
     })
     .default({ payment_support: [], payment_type: '' })
-})
+});
 
-type FormData = yup.InferType<typeof schema>
+type FormData = yup.InferType<typeof schema>;
 
 const TaxForm = ({ isEdit = false, taxId }: TaxFormProps) => {
-  const router = useRouter()
-  const dispatch = useAppDispatch()
-  const { isLoading, error, currentTax } = useAppSelector(state => state.taxes)
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { isLoading, error, currentTax } = useAppSelector(state => state.taxes);
 
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
     severity: 'success'
-  })
+  });
 
   // Get current organization ID
   const getOrganizationId = () => {
-    return Cookies.get('organization_id') || sessionStorage.getItem('organization_id') || ''
-  }
+    return Cookies.get('organization_id') || sessionStorage.getItem('organization_id') || '';
+  };
 
   // Handle form validation
   const {
@@ -105,22 +104,22 @@ const TaxForm = ({ isEdit = false, taxId }: TaxFormProps) => {
         payment_type: ''
       }
     }
-  })
+  });
 
   // Fetch tax data if editing
   useEffect(() => {
     if (isEdit && taxId) {
-      dispatch(fetchSingleTax(taxId))
+      dispatch(fetchSingleTax(taxId));
     }
 
     // Always set organization ID
-    setValue('organization_id', getOrganizationId())
+    setValue('organization_id', getOrganizationId());
 
     // Clear any errors when unmounting
     return () => {
-      dispatch(clearTaxError())
-    }
-  }, [dispatch, isEdit, taxId, setValue])
+      dispatch(clearTaxError());
+    };
+  }, [dispatch, isEdit, taxId, setValue]);
 
   // Populate form when tax data is available
   useEffect(() => {
@@ -137,28 +136,28 @@ const TaxForm = ({ isEdit = false, taxId }: TaxFormProps) => {
           payment_support: currentTax.metadata?.payment_support || [],
           payment_type: currentTax.metadata?.payment_type || ''
         }
-      })
+      });
     }
-  }, [currentTax, isEdit, reset])
+  }, [currentTax, isEdit, reset]);
 
   // Track selected payment support options
-  const watchPaymentSupport = watch('metadata.payment_support', [])
+  const watchPaymentSupport = watch('metadata.payment_support', []);
 
   // Handle payment support selection
   const handlePaymentSupportChange = (supportType: string) => {
-    const currentSupport = watchPaymentSupport || []
+    const currentSupport = watchPaymentSupport || [];
 
     if (currentSupport.includes(supportType)) {
       // Remove from selection
       setValue(
         'metadata.payment_support',
         currentSupport.filter(item => item !== supportType)
-      )
+      );
     } else {
       // Add to selection
-      setValue('metadata.payment_support', [...currentSupport, supportType])
+      setValue('metadata.payment_support', [...currentSupport, supportType]);
     }
-  }
+  };
 
   // Handle form submission
   const onSubmit = async (data: FormData) => {
@@ -176,16 +175,16 @@ const TaxForm = ({ isEdit = false, taxId }: TaxFormProps) => {
           payment_support: data.metadata.payment_support as string[],
           payment_type: data.metadata.payment_type || ''
         }
-      }
+      };
 
-      let result
+      let result;
 
       if (isEdit && taxId) {
         // Update existing tax
-        result = await dispatch(updateServiceTax({ id: taxId, taxData }))
+        result = await dispatch(updateServiceTax({ id: taxId, taxData }));
       } else {
         // Create new tax
-        result = await dispatch(createServiceTax(taxData))
+        result = await dispatch(createServiceTax(taxData));
       }
 
       if (createServiceTax.fulfilled.match(result) || updateServiceTax.fulfilled.match(result)) {
@@ -193,31 +192,31 @@ const TaxForm = ({ isEdit = false, taxId }: TaxFormProps) => {
           open: true,
           message: `Tax service ${isEdit ? 'updated' : 'created'} successfully`,
           severity: 'success'
-        })
+        });
 
         // Navigate back to taxes list after short delay
         setTimeout(() => {
-          router.push('/services/taxes')
-        }, 1500)
+          router.push('/services/taxes');
+        }, 1500);
       } else {
         setSnackbar({
           open: true,
           message: (result.payload as string) || `Failed to ${isEdit ? 'update' : 'create'} tax service`,
           severity: 'error'
-        })
+        });
       }
     } catch (err: any) {
       setSnackbar({
         open: true,
         message: err.message || `An error occurred`,
         severity: 'error'
-      })
+      });
     }
-  }
+  };
 
   const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false })
-  }
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   return (
     <Grid container spacing={6}>
@@ -451,7 +450,7 @@ const TaxForm = ({ isEdit = false, taxId }: TaxFormProps) => {
         </Alert>
       </Snackbar>
     </Grid>
-  )
-}
+  );
+};
 
-export default TaxForm
+export default TaxForm;

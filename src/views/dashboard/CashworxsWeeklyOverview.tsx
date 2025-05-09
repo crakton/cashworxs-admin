@@ -1,24 +1,24 @@
-'use client'
+'use client';
 
 // Next Imports
-import dynamic from 'next/dynamic'
+import dynamic from 'next/dynamic';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material/styles'
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
 
 // Third-party Imports
-import type { ApexOptions } from 'apexcharts'
+import type { ApexOptions } from 'apexcharts';
 
 // Styled Component Imports
-const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
+const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'));
 
 const CashworxsWeeklyOverview = () => {
   // Hooks
-  const theme = useTheme()
+  const theme = useTheme();
 
   // Sample data - in a real app, you would calculate this from your backend data
   const series = [
@@ -30,7 +30,7 @@ const CashworxsWeeklyOverview = () => {
       name: 'Transactions',
       data: [14, 25, 20, 34, 20, 40, 25]
     }
-  ]
+  ];
 
   // Chart options
   const options: ApexOptions = {
@@ -68,7 +68,7 @@ const CashworxsWeeklyOverview = () => {
       fontSize: '14px',
       itemMargin: { horizontal: 8 }
     }
-  }
+  };
 
   return (
     <Card>
@@ -77,7 +77,7 @@ const CashworxsWeeklyOverview = () => {
         <AppReactApexCharts type='bar' height={300} options={options} series={series} />
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default CashworxsWeeklyOverview
+export default CashworxsWeeklyOverview;

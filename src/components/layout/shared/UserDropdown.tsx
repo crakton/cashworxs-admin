@@ -1,31 +1,31 @@
-'use client'
+'use client';
 
 // React Imports
-import { useEffect, useRef, useState } from 'react'
-import type { MouseEvent } from 'react'
+import { useEffect, useRef, useState } from 'react';
+import type { MouseEvent } from 'react';
 
 // Next Imports
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
 // MUI Imports
-import { styled } from '@mui/material/styles'
-import Badge from '@mui/material/Badge'
-import Avatar from '@mui/material/Avatar'
-import Popper from '@mui/material/Popper'
-import Fade from '@mui/material/Fade'
-import Paper from '@mui/material/Paper'
-import ClickAwayListener from '@mui/material/ClickAwayListener'
-import MenuList from '@mui/material/MenuList'
-import Typography from '@mui/material/Typography'
-import Divider from '@mui/material/Divider'
-import MenuItem from '@mui/material/MenuItem'
-import Button from '@mui/material/Button'
+import { styled } from '@mui/material/styles';
+import Badge from '@mui/material/Badge';
+import Avatar from '@mui/material/Avatar';
+import Popper from '@mui/material/Popper';
+import Fade from '@mui/material/Fade';
+import Paper from '@mui/material/Paper';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import MenuList from '@mui/material/MenuList';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import MenuItem from '@mui/material/MenuItem';
+import Button from '@mui/material/Button';
 
 // Redux import
-import { getUser, logout } from '@/store/slices/authSlice'
+import { getUser, logout } from '@/store/slices/authSlice';
 
 // Hooks import
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
 
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
@@ -35,43 +35,45 @@ const BadgeContentSpan = styled('span')({
   cursor: 'pointer',
   backgroundColor: 'var(--mui-palette-success-main)',
   boxShadow: '0 0 0 2px var(--mui-palette-background-paper)'
-})
+});
 
 const UserDropdown = () => {
   // Redux states
-  const dispatch = useAppDispatch()
+  const dispatch = useAppDispatch();
 
   // States
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   // Refs
-  const anchorRef = useRef<HTMLDivElement>(null)
+  const anchorRef = useRef<HTMLDivElement>(null);
 
   // Hooks
-  const router = useRouter()
+  const router = useRouter();
 
   const handleDropdownOpen = () => {
-    !open ? setOpen(true) : setOpen(false)
-  }
+    !open ? setOpen(true) : setOpen(false);
+  };
 
   const handleDropdownClose = (event?: MouseEvent<HTMLLIElement> | (MouseEvent | TouchEvent), url?: string) => {
     if (url) {
-      dispatch(logout())
-      router.replace(url)
+      dispatch(logout());
+      router.replace(url);
     }
 
     if (anchorRef.current && anchorRef.current.contains(event?.target as HTMLElement)) {
-      return
+      return;
     }
 
-    setOpen(false)
-  }
-  const { user } = useAppSelector(state => state.auth)
+    setOpen(false);
+  };
+
+  const { user } = useAppSelector(state => state.auth);
+
   useEffect(() => {
     if (!user) {
-      dispatch(getUser())
+      dispatch(getUser());
     }
-  }, [user])
+  }, [user]);
 
   return (
     <>
@@ -151,7 +153,7 @@ const UserDropdown = () => {
         )}
       </Popper>
     </>
-  )
-}
+  );
+};
 
-export default UserDropdown
+export default UserDropdown;

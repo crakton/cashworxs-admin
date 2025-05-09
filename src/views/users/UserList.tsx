@@ -1,71 +1,72 @@
-'use client'
+'use client';
 
 // React Imports
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
 // Next Imports
-import Link from 'next/link'
+import Link from 'next/link';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Table from '@mui/material/Table'
-import Button from '@mui/material/Button'
-import TableRow from '@mui/material/TableRow'
-import TableHead from '@mui/material/TableHead'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import CardHeader from '@mui/material/CardHeader'
-import TableContainer from '@mui/material/TableContainer'
-import LinearProgress from '@mui/material/LinearProgress'
-import CardContent from '@mui/material/CardContent'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Alert from '@mui/material/Alert'
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import TableRow from '@mui/material/TableRow';
+import TableHead from '@mui/material/TableHead';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import CardHeader from '@mui/material/CardHeader';
+import TableContainer from '@mui/material/TableContainer';
+import LinearProgress from '@mui/material/LinearProgress';
+import CardContent from '@mui/material/CardContent';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Alert from '@mui/material/Alert';
 
 // Icon Imports
 
 // Redux Imports
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { Mode } from '@/@core/types'
-import { deleteUser, fetchAllUsers } from '@/store/slices/userSlice'
-import { Icon } from '@mui/material'
+import { Icon } from '@mui/material';
+
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import type { Mode } from '@/@core/types';
+import { deleteUser, fetchAllUsers } from '@/store/slices/userSlice';
 
 const UserList = ({ mode }: { mode: Mode }) => {
   // Hooks
-  const dispatch = useAppDispatch()
-  const { users, isLoading, error } = useAppSelector(state => state.users)
+  const dispatch = useAppDispatch();
+  const { users, isLoading, error } = useAppSelector(state => state.users);
 
   // State
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; userId: string | null }>({
     open: false,
     userId: null
-  })
+  });
 
   // Effects
   useEffect(() => {
-    dispatch(fetchAllUsers())
-  }, [dispatch])
+    dispatch(fetchAllUsers());
+  }, [dispatch]);
 
   // Handlers
   const handleOpenDeleteDialog = (userId: string) => {
-    setDeleteDialog({ open: true, userId })
-  }
+    setDeleteDialog({ open: true, userId });
+  };
 
   const handleCloseDeleteDialog = () => {
-    setDeleteDialog({ open: false, userId: null })
-  }
+    setDeleteDialog({ open: false, userId: null });
+  };
 
   const handleDeleteUser = async () => {
     if (deleteDialog.userId) {
-      await dispatch(deleteUser(deleteDialog.userId))
-      handleCloseDeleteDialog()
+      await dispatch(deleteUser(deleteDialog.userId));
+      handleCloseDeleteDialog();
     }
-  }
+  };
 
   return (
     <Grid container spacing={6}>
@@ -150,7 +151,7 @@ const UserList = ({ mode }: { mode: Mode }) => {
         </DialogActions>
       </Dialog>
     </Grid>
-  )
-}
+  );
+};
 
-export default UserList
+export default UserList;

@@ -1,26 +1,28 @@
-'use client'
+'use client';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import { useTheme } from '@mui/material/styles'
-import Box from '@mui/material/Box'
+import type { FC } from 'react';
+import { useMemo } from 'react';
+
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import { useTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
 
 // Types Import
-import { Payment } from '@/store/slices/paymentsSlice'
+import type { Payment } from '@/store/slices/paymentsSlice';
 
 // React Imports
-import { FC, useMemo } from 'react'
-import { formateNumber } from '@/utils/formatDate'
+import { formateNumber } from '@/utils/formatDate';
 
 interface PaymentOverviewProps {
   payments: Payment[]
 }
 
 const PaymentOverview: FC<PaymentOverviewProps> = ({ payments }) => {
-  const theme = useTheme()
+  const theme = useTheme();
 
   // Calculate payment statistics
   const stats = useMemo(() => {
@@ -31,12 +33,13 @@ const PaymentOverview: FC<PaymentOverviewProps> = ({ payments }) => {
         completedTransactions: 0,
         completedAmount: 0,
         pendingTransactions: 0
-      }
+      };
     }
-    const totalAmount = payments?.reduce((sum, payment) => sum + Number(payment.amount), 0)
-    const completedPayments = payments.filter(payment => payment.status === 1)
-    const pendingPayments = payments.filter(payment => payment.status === 0)
-    const completedAmount = completedPayments.reduce((sum, payment) => sum + Number(payment.amount), 0)
+
+    const totalAmount = payments?.reduce((sum, payment) => sum + Number(payment.amount), 0);
+    const completedPayments = payments.filter(payment => payment.status === 1);
+    const pendingPayments = payments.filter(payment => payment.status === 0);
+    const completedAmount = completedPayments.reduce((sum, payment) => sum + Number(payment.amount), 0);
 
     return {
       totalTransactions: payments.length,
@@ -44,8 +47,8 @@ const PaymentOverview: FC<PaymentOverviewProps> = ({ payments }) => {
       completedTransactions: completedPayments.length,
       completedAmount,
       pendingTransactions: pendingPayments.length
-    }
-  }, [payments])
+    };
+  }, [payments]);
 
   return (
     <Card>
@@ -76,7 +79,7 @@ const PaymentOverview: FC<PaymentOverviewProps> = ({ payments }) => {
         </Button> */}
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default PaymentOverview
+export default PaymentOverview;

@@ -1,28 +1,28 @@
-'use client'
+'use client';
 
 // React Imports
-import { useState } from 'react'
+import { useState } from 'react';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import Box from '@mui/material/Box'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TablePagination from '@mui/material/TablePagination'
-import TableRow from '@mui/material/TableRow'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
-import CardHeader from '@mui/material/CardHeader'
-import IconButton from '@mui/material/IconButton'
-import TextField from '@mui/material/TextField'
-import InputAdornment from '@mui/material/InputAdornment'
+import Card from '@mui/material/Card';
+import Box from '@mui/material/Box';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import Typography from '@mui/material/Typography';
+import Chip from '@mui/material/Chip';
+import CardHeader from '@mui/material/CardHeader';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
 
 // Types Import
-import { Payment } from '@/store/slices/paymentsSlice'
-import formatDate, { formateNumber } from '@/utils/formatDate'
+import type { Payment } from '@/store/slices/paymentsSlice';
+import formatDate, { formateNumber } from '@/utils/formatDate';
 
 // Format Date
 
@@ -32,42 +32,43 @@ interface PaymentsTableProps {
 
 const PaymentsTable = ({ payments }: PaymentsTableProps) => {
   // States
-  const [page, setPage] = useState<number>(0)
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10)
-  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Handle page change
   const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage)
-  }
+    setPage(newPage);
+  };
 
   // Handle rows per page change
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
-  }
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   // Filter payments based on search query
   const filteredPayments = payments.filter(payment => {
-    const searchString = searchQuery.toLowerCase()
+    const searchString = searchQuery.toLowerCase();
+
     return (
       payment.invoice_number.toLowerCase().includes(searchString) ||
       payment.note.toLowerCase().includes(searchString) ||
       payment.receipt_no.toLowerCase().includes(searchString)
-    )
-  })
+    );
+  });
 
   // Get status color based on payment status
   const getStatusColor = (status: number) => {
     switch (status) {
       case 1:
-        return 'success'
+        return 'success';
       case 0:
-        return 'warning'
+        return 'warning';
       default:
-        return 'error'
+        return 'error';
     }
-  }
+  };
 
   return (
     <Card>
@@ -155,7 +156,7 @@ const PaymentsTable = ({ payments }: PaymentsTableProps) => {
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
     </Card>
-  )
-}
+  );
+};
 
-export default PaymentsTable
+export default PaymentsTable;

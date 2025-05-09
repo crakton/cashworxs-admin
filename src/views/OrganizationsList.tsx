@@ -1,11 +1,9 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { fetchOrganizations, deleteOrganization, clearError, Organization } from '@/store/slices/organizationsSlice'
+import { useState, useEffect } from 'react';
 
-// MUI Imports
+import { useRouter } from 'next/navigation';
+
 import {
   Card,
   CardHeader,
@@ -32,87 +30,96 @@ import {
   TableHead,
   TableRow,
   TablePagination
-} from '@mui/material'
+} from '@mui/material';
+
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import type { Organization } from '@/store/slices/organizationsSlice';
+import { fetchOrganizations, deleteOrganization, clearError } from '@/store/slices/organizationsSlice';
+
+// MUI Imports
 
 const OrganizationsList = () => {
-  const router = useRouter()
-  const dispatch = useAppDispatch()
-  const { organizations, isLoading, error } = useAppSelector(state => state.organizations)
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { organizations, isLoading, error } = useAppSelector(state => state.organizations);
 
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(10)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [organizationToDelete, setOrganizationToDelete] = useState<string | null>(null)
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [organizationToDelete, setOrganizationToDelete] = useState<string | null>(null);
+
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
     severity: 'success'
-  })
+  });
 
   // Fetch organizations on component mount
   useEffect(() => {
-    dispatch(fetchOrganizations())
-  }, [dispatch])
+    dispatch(fetchOrganizations());
+  }, [dispatch]);
 
   // Handle page change
   const handleChangePage = (_event: unknown, newPage: number) => {
-    setPage(newPage)
-  }
+    setPage(newPage);
+  };
 
   // Handle rows per page change
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
-  }
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   // Handle delete organization
   const handleDeleteClick = (organizationId: string) => {
-    setOrganizationToDelete(organizationId)
-    setDeleteDialogOpen(true)
-  }
+    setOrganizationToDelete(organizationId);
+    setDeleteDialogOpen(true);
+  };
 
   const handleDeleteConfirm = async () => {
     if (organizationToDelete) {
       try {
-        const resultAction = await dispatch(deleteOrganization(organizationToDelete))
+        const resultAction = await dispatch(deleteOrganization(organizationToDelete));
+
         if (deleteOrganization.fulfilled.match(resultAction)) {
           setSnackbar({
             open: true,
             message: 'Organization deleted successfully',
             severity: 'success'
-          })
+          });
         } else {
           setSnackbar({
             open: true,
             message: 'Failed to delete organization',
             severity: 'error'
-          })
+          });
         }
       } catch (error) {
         setSnackbar({
           open: true,
           message: 'An error occurred',
           severity: 'error'
-        })
+        });
       }
     }
-    setDeleteDialogOpen(false)
-    setOrganizationToDelete(null)
-  }
+
+    setDeleteDialogOpen(false);
+    setOrganizationToDelete(null);
+  };
 
   const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false })
-  }
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   // View organization details
   const handleViewOrganization = (organizationId: string) => {
-    router.push(`/organizations/${organizationId}`)
-  }
+    router.push(`/organizations/${organizationId}`);
+  };
 
   // Edit organization
   const handleEditOrganization = (organizationId: string) => {
-    router.push(`/organizations/edit/${organizationId}`)
-  }
+    router.push(`/organizations/edit/${organizationId}`);
+  };
 
   return (
     <Grid container spacing={6}>
@@ -245,7 +252,7 @@ const OrganizationsList = () => {
         </Alert>
       </Snackbar>
     </Grid>
-  )
-}
+  );
+};
 
-export default OrganizationsList
+export default OrganizationsList;

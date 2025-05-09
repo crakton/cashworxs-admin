@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
 // Next Imports
-import dynamic from 'next/dynamic'
+import dynamic from 'next/dynamic';
 
 //MUI Imports
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import { useTheme } from '@mui/material/styles'
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
 
 // Third-party Imports
-import type { ApexOptions } from 'apexcharts'
+import type { ApexOptions } from 'apexcharts';
 
 // Styled Component Imports
-const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
+const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'));
 
 // Vars
 const series = [
@@ -21,16 +21,16 @@ const series = [
     name: '2022',
     data: [45, 85, 65, 50, 70]
   }
-]
+];
 
 const DistributedColumnChart = () => {
   // Hooks
-  const theme = useTheme()
+  const theme = useTheme();
 
   // Vars
-  const primaryColor = 'var(--mui-palette-primary-main)'
-  const errorColor = 'var(--mui-palette-error-main)'
-  const trackBgColor = 'var(--mui-palette-customColors-trackBg)'
+  const primaryColor = 'var(--mui-palette-primary-main)';
+  const errorColor = 'var(--mui-palette-error-main)';
+  const trackBgColor = 'var(--mui-palette-customColors-trackBg)';
 
   const options: ApexOptions = {
     chart: {
@@ -96,7 +96,7 @@ const DistributedColumnChart = () => {
         }
       }
     ]
-  }
+  };
 
   return (
     <Card>
@@ -108,7 +108,7 @@ const DistributedColumnChart = () => {
         </Typography>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default DistributedColumnChart
+export default DistributedColumnChart;

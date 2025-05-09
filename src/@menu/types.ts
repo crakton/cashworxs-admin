@@ -1,15 +1,15 @@
 // React Imports
-import type { AnchorHTMLAttributes, ReactElement, ReactNode } from 'react'
+import type { AnchorHTMLAttributes, ReactElement, ReactNode } from 'react';
 
 // Third-party Imports
-import type { CSSObject } from '@emotion/styled'
+import type { CSSObject } from '@emotion/styled';
 
 export type ChildrenType = {
   children: ReactNode
-}
+};
 
 // Breakpoints
-export type BreakpointType = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'always'
+export type BreakpointType = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'always';
 
 // Exact match for active URL in menu item
 export type MenuItemExactMatchUrlProps =
@@ -24,10 +24,10 @@ export type MenuItemExactMatchUrlProps =
   | {
       exactMatch?: never
       activeUrl?: never
-    }
+    };
 
 // Menu Item Elements for styling
-export type MenuItemElement = 'root' | 'button' | 'icon' | 'label' | 'prefix' | 'suffix'
+export type MenuItemElement = 'root' | 'button' | 'icon' | 'label' | 'prefix' | 'suffix';
 
 // Sub Menu Item Elements for styling
 export type SubMenuItemElement =
@@ -39,10 +39,10 @@ export type SubMenuItemElement =
   | 'icon'
   | 'subMenuStyles'
   | 'subMenuContent'
-  | 'subMenuExpandIcon'
+  | 'subMenuExpandIcon';
 
 // Menu Button Props
-export type MenuButtonProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> & Partial<ChildrenType>
+export type MenuButtonProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> & Partial<ChildrenType>;
 
 // Menu Item Styles Params Type
 export type MenuItemStylesParams = {
@@ -51,10 +51,10 @@ export type MenuItemStylesParams = {
   active?: boolean
   isSubmenu: boolean
   open?: boolean
-}
+};
 
 // Menu Item Style Elements Type
-export type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | undefined)
+export type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | undefined);
 
 // Menu Item Styles Type
 export type MenuItemStyles = {
@@ -67,7 +67,7 @@ export type MenuItemStyles = {
   subMenuStyles?: ElementStyles
   subMenuContent?: ElementStyles
   subMenuExpandIcon?: ElementStyles
-}
+};
 
 // Expand Icon
 export type RenderExpandIconParams = {
@@ -75,7 +75,7 @@ export type RenderExpandIconParams = {
   level: number
   active: boolean
   disabled: boolean
-}
+};
 
 // Icon for menu items in expanded submenu
 export type RenderExpandedMenuItemIcon = {
@@ -84,9 +84,9 @@ export type RenderExpandedMenuItemIcon = {
     | ((params: { level?: number; active?: boolean; disabled?: boolean }) => ReactElement | null)
     | null
   level?: number
-}
+};
 
 // Root Styles
 export type RootStylesType = {
   rootStyles?: CSSObject
-}
+};

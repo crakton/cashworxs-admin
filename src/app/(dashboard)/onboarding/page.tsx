@@ -1,14 +1,14 @@
 // Component Imports
 
 // Server Action Imports
-import OnboardingAdmin from '@/views/onboarding/OnboardingAdmin'
-import { getServerMode } from '@core/utils/serverHelpers'
+import OnboardingAdmin from '@/views/onboarding/OnboardingAdmin';
+import { getServerMode } from '@core/utils/serverHelpers';
 
 const OnboardingPage = () => {
   // Vars
-  const mode = getServerMode()
+  const mode = getServerMode();
 
-  return <OnboardingAdmin />
-}
+  return <OnboardingAdmin />;
+};
 
-export default OnboardingPage
+export default OnboardingPage;

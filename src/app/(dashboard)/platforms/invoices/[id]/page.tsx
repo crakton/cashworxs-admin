@@ -1,7 +1,9 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react';
+
+import { useParams, useRouter } from 'next/navigation';
+
 import {
   Button,
   Card,
@@ -16,53 +18,54 @@ import {
   Box,
   Divider,
   Skeleton
-} from '@mui/material'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { fetchInvoiceDetails } from '@/store/slices/invoicesSlice'
-import { formateNumber } from '@/utils/formatDate'
+} from '@mui/material';
+
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { fetchInvoiceDetails } from '@/store/slices/invoicesSlice';
+import { formateNumber } from '@/utils/formatDate';
 
 const InvoiceDetailsPage = () => {
-  const { id } = useParams()
-  const router = useRouter()
-  const dispatch = useAppDispatch()
-  const { currentInvoice: invoice, isLoading, error } = useAppSelector(state => state.invoices)
-  const [fetchError, setFetchError] = useState(null)
+  const { id } = useParams();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { currentInvoice: invoice, isLoading, error } = useAppSelector(state => state.invoices);
+  const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
     if (typeof id === 'string') {
       dispatch(fetchInvoiceDetails(id))
         .unwrap()
         .catch(err => {
-          setFetchError(err.message || 'Failed to load invoice details')
-        })
+          setFetchError(err.message || 'Failed to load invoice details');
+        });
     }
-  }, [dispatch, id])
+  }, [dispatch, id]);
 
   const getStatusColor = (status: number) => {
     switch (status) {
       case 1:
-        return 'success'
+        return 'success';
       case 0:
-        return 'warning'
+        return 'warning';
       default:
-        return 'error'
+        return 'error';
     }
-  }
+  };
 
   const getStatusLabel = (status: number) => {
     switch (status) {
       case 1:
-        return 'Paid'
+        return 'Paid';
       case 0:
-        return 'Pending'
+        return 'Pending';
       default:
-        return 'Overdued'
+        return 'Overdued';
     }
-  }
+  };
 
   const handleGoBack = () => {
-    router.back()
-  }
+    router.back();
+  };
 
   // Loading state
   if (isLoading) {
@@ -82,7 +85,7 @@ const InvoiceDetailsPage = () => {
           </Card>
         </Grid>
       </Grid>
-    )
+    );
   }
 
   // Error state
@@ -104,7 +107,7 @@ const InvoiceDetailsPage = () => {
           </Alert>
         </Grid>
       </Grid>
-    )
+    );
   }
 
   return (
@@ -181,7 +184,7 @@ const InvoiceDetailsPage = () => {
         </Card>
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
-export default InvoiceDetailsPage
+export default InvoiceDetailsPage;

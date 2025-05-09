@@ -1,28 +1,28 @@
 // React Imports
-import { forwardRef } from 'react'
-import type { ForwardRefRenderFunction } from 'react'
+import { forwardRef } from 'react';
+import type { ForwardRefRenderFunction } from 'react';
 
 // Third-party Imports
-import { css } from '@emotion/react'
+import { css } from '@emotion/react';
 
 // Type Imports
-import type { ChildrenType, MenuButtonProps } from '../../types'
+import type { ChildrenType, MenuButtonProps } from '../../types';
 
 // Component Imports
-import { RouterLink } from '../RouterLink'
+import { RouterLink } from '../RouterLink';
 
 // Util Imports
-import { menuClasses } from '../../utils/menuClasses'
+import { menuClasses } from '../../utils/menuClasses';
 
 type MenuButtonStylesProps = Partial<ChildrenType> & {
   level: number
   active?: boolean
   disabled?: boolean
-}
+};
 
 export const menuButtonStyles = (props: MenuButtonStylesProps) => {
   // Props
-  const { level, disabled, children } = props
+  const { level, disabled, children } = props;
 
   return css({
     display: 'flex',
@@ -55,8 +55,8 @@ export const menuButtonStyles = (props: MenuButtonStylesProps) => {
       ...(!children && { color: 'white' }),
       backgroundColor: children ? '#f3f3f3' : '#765feb'
     }
-  })
-}
+  });
+};
 
 const MenuButton: ForwardRefRenderFunction<HTMLAnchorElement, MenuButtonProps> = (
   { className, children, ...rest },
@@ -70,7 +70,7 @@ const MenuButton: ForwardRefRenderFunction<HTMLAnchorElement, MenuButtonProps> =
     <a ref={ref} className={className} {...rest}>
       {children}
     </a>
-  )
-}
+  );
+};
 
-export default forwardRef(MenuButton)
+export default forwardRef(MenuButton);

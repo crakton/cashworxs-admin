@@ -1,92 +1,97 @@
-'use client'
+'use client';
 
 // React Imports
-import { useState, FormEvent } from 'react'
+import type { FormEvent } from 'react';
+import { useState } from 'react';
 
 // Next Imports
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
-import IconButton from '@mui/material/IconButton'
-import InputAdornment from '@mui/material/InputAdornment'
-import Checkbox from '@mui/material/Checkbox'
-import Button from '@mui/material/Button'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Divider from '@mui/material/Divider'
-import CircularProgress from '@mui/material/CircularProgress'
-import Alert from '@mui/material/Alert'
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Checkbox from '@mui/material/Checkbox';
+import Button from '@mui/material/Button';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Divider from '@mui/material/Divider';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 
 // Type Imports
-import type { Mode } from '@core/types'
+import type { Mode } from '@core/types';
 
 // Component Imports
-import Logo from '@components/layout/shared/Logo'
-import Illustrations from '@components/Illustrations'
+import Logo from '@components/layout/shared/Logo';
+import Illustrations from '@components/Illustrations';
 
 // Config Imports
-import themeConfig from '@configs/themeConfig'
+import themeConfig from '@configs/themeConfig';
 
 // Hook Imports
-import { useImageVariant } from '@core/hooks/useImageVariant'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { login, clearError } from '@/store/slices/authSlice'
+import { useImageVariant } from '@core/hooks/useImageVariant';
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { login, clearError } from '@/store/slices/authSlice';
 
 const Login = ({ mode }: { mode: Mode }) => {
   // States
-  const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [isPasswordShown, setIsPasswordShown] = useState(false);
+
   const [formData, setFormData] = useState({
     phone_number: '',
     password: ''
-  })
-  const [rememberMe, setRememberMe] = useState(false)
+  });
+
+  const [rememberMe, setRememberMe] = useState(false);
 
   // Redux
-  const dispatch = useAppDispatch()
-  const { isLoading, error } = useAppSelector(state => state.auth)
+  const dispatch = useAppDispatch();
+  const { isLoading, error } = useAppSelector(state => state.auth);
 
   // Vars
-  const darkImg = '/images/pages/auth-v1-mask-dark.png'
-  const lightImg = '/images/pages/auth-v1-mask-light.png'
+  const darkImg = '/images/pages/auth-v1-mask-dark.png';
+  const lightImg = '/images/pages/auth-v1-mask-light.png';
 
   // Hooks
-  const router = useRouter()
-  const authBackground = useImageVariant(mode, lightImg, darkImg)
+  const router = useRouter();
+  const authBackground = useImageVariant(mode, lightImg, darkImg);
 
-  const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+  const handleClickShowPassword = () => setIsPasswordShown(show => !show);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
-  }
+    }));
+  };
 
   const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRememberMe(e.target.checked)
-  }
+    setRememberMe(e.target.checked);
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (error) {
-      dispatch(clearError())
+      dispatch(clearError());
     }
 
     try {
-      const resultAction = await dispatch(login(formData))
+      const resultAction = await dispatch(login(formData));
+
       if (login.fulfilled.match(resultAction) && resultAction.payload.user.is_admin) {
-        router.push('/')
+        router.push('/');
       }
     } catch (error) {
-      console.error('Login failed:', error)
+      console.error('Login failed:', error);
     }
-  }
+  };
 
   return (
     <div className='flex flex-col justify-center items-center min-bs-[100dvh] relative p-6'>
@@ -118,11 +123,12 @@ const Login = ({ mode }: { mode: Mode }) => {
                   inputMode: 'numeric'
                 }}
                 onChange={e => {
-                  const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 11)
+                  const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+
                   setFormData(prev => ({
                     ...prev,
                     phone_number: value
-                  }))
+                  }));
                 }}
                 required
                 error={formData.phone_number.length > 0 && formData.phone_number.length !== 11}
@@ -198,7 +204,7 @@ const Login = ({ mode }: { mode: Mode }) => {
       </Card>
       <Illustrations maskImg={{ src: authBackground }} />
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

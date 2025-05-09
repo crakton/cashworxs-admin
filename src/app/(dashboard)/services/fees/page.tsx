@@ -1,77 +1,77 @@
-'use client'
+'use client';
 
 // React Imports
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
 // Next Imports
-import Link from 'next/link'
+import Link from 'next/link';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Table from '@mui/material/Table'
-import Button from '@mui/material/Button'
-import TableRow from '@mui/material/TableRow'
-import TableHead from '@mui/material/TableHead'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import CardHeader from '@mui/material/CardHeader'
-import TableContainer from '@mui/material/TableContainer'
-import LinearProgress from '@mui/material/LinearProgress'
-import CardContent from '@mui/material/CardContent'
-import Alert from '@mui/material/Alert'
-import AlertTitle from '@mui/material/AlertTitle'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
-import TablePagination from '@mui/material/TablePagination'
-import Chip from '@mui/material/Chip'
-import Tooltip from '@mui/material/Tooltip'
-import Skeleton from '@mui/material/Skeleton'
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import TableRow from '@mui/material/TableRow';
+import TableHead from '@mui/material/TableHead';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import CardHeader from '@mui/material/CardHeader';
+import TableContainer from '@mui/material/TableContainer';
+import LinearProgress from '@mui/material/LinearProgress';
+import CardContent from '@mui/material/CardContent';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import TablePagination from '@mui/material/TablePagination';
+import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
+import Skeleton from '@mui/material/Skeleton';
 
 // Redux Imports
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { fetchServiceFees, deleteServiceFee, clearFeeError } from '@/store/slices/feesSlice'
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { fetchServiceFees, deleteServiceFee, clearFeeError } from '@/store/slices/feesSlice';
 
 const FeesServicesPage = () => {
-  const dispatch = useAppDispatch()
-  const { serviceFees: fees, isLoading, error } = useAppSelector(state => state.fees)
+  const dispatch = useAppDispatch();
+  const { serviceFees: fees, isLoading, error } = useAppSelector(state => state.fees);
 
   // Pagination states
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Delete confirmation dialog
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     feeId: '',
     feeName: ''
-  })
+  });
 
   // Refresh state
-  const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     dispatch(fetchServiceFees())
       .unwrap()
       .catch(err => {
-        console.error('Failed to fetch fees:', err)
-      })
-  }, [dispatch, refreshTrigger])
+        console.error('Failed to fetch fees:', err);
+      });
+  }, [dispatch, refreshTrigger]);
 
   // Pagination handlers
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
-    setPage(newPage)
-  }
+    setPage(newPage);
+  };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
-  }
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   // Handle delete confirmation
   const openDeleteDialog = (id: string, name: string) => {
@@ -79,41 +79,41 @@ const FeesServicesPage = () => {
       open: true,
       feeId: id,
       feeName: name
-    })
-  }
+    });
+  };
 
   const closeDeleteDialog = () => {
     setDeleteDialog({
       open: false,
       feeId: '',
       feeName: ''
-    })
-  }
+    });
+  };
 
   const confirmDelete = () => {
     dispatch(deleteServiceFee(deleteDialog.feeId))
       .unwrap()
       .then(() => {
-        closeDeleteDialog()
+        closeDeleteDialog();
       })
       .catch(err => {
-        console.error('Failed to delete fee:', err)
-        closeDeleteDialog()
-      })
-  }
+        console.error('Failed to delete fee:', err);
+        closeDeleteDialog();
+      });
+  };
 
   // Handle refresh
   const handleRefresh = () => {
-    setRefreshTrigger(prev => prev + 1)
-  }
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   // Clear error
   const handleDismissError = () => {
-    dispatch(clearFeeError())
-  }
+    dispatch(clearFeeError());
+  };
 
   // Apply pagination to the fees data
-  const paginatedFees = fees.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  const paginatedFees = fees.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   // Loading skeleton
   const renderSkeleton = () => {
@@ -134,8 +134,8 @@ const FeesServicesPage = () => {
             <Skeleton variant='text' width={100} />
           </TableCell>
         </TableRow>
-      ))
-  }
+      ));
+  };
 
   return (
     <Grid container spacing={6}>
@@ -279,7 +279,7 @@ const FeesServicesPage = () => {
         </DialogActions>
       </Dialog>
     </Grid>
-  )
-}
+  );
+};
 
-export default FeesServicesPage
+export default FeesServicesPage;

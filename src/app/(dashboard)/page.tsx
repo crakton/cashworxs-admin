@@ -1,40 +1,41 @@
-'use client'
+'use client';
 
 // Next Imports
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 
 // MUI Imports
-import Grid from '@mui/material/Grid'
-import Alert from '@mui/material/Alert'
-import CircularProgress from '@mui/material/CircularProgress'
-import Box from '@mui/material/Box'
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 
 // Components Imports
-import CashworxsOverview from '@views/dashboard/CashworxsOverview'
-import MetricsOverview from '@views/dashboard/MetricsOverview'
-import RecentTransactions from '@views/dashboard/RecentTransactions'
-import RecentUsers from '@views/dashboard/RecentUsers'
-import CashworxsWeeklyOverview from '@views/dashboard/CashworxsWeeklyOverview'
-import FeesDistribution from '@views/dashboard/FeesDistribution'
-import CardStatVertical from '@components/card-statistics/Vertical'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { fetchDashboardStats } from '@/store/slices/dashboardSlice'
-import { LinearProgress } from '@mui/material'
+import { LinearProgress } from '@mui/material';
+
+import CashworxsOverview from '@views/dashboard/CashworxsOverview';
+import MetricsOverview from '@views/dashboard/MetricsOverview';
+import RecentTransactions from '@views/dashboard/RecentTransactions';
+import RecentUsers from '@views/dashboard/RecentUsers';
+import CashworxsWeeklyOverview from '@views/dashboard/CashworxsWeeklyOverview';
+import FeesDistribution from '@views/dashboard/FeesDistribution';
+import CardStatVertical from '@components/card-statistics/Vertical';
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { fetchDashboardStats } from '@/store/slices/dashboardSlice';
 
 const CashworxsAdminDashboard = () => {
-  const dispatch = useAppDispatch()
-  const { stats, isLoading, error } = useAppSelector(state => state.dashboard)
+  const dispatch = useAppDispatch();
+  const { stats, isLoading, error } = useAppSelector(state => state.dashboard);
 
   useEffect(() => {
-    dispatch(fetchDashboardStats())
-  }, [dispatch])
+    dispatch(fetchDashboardStats());
+  }, [dispatch]);
 
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
         <LinearProgress />
       </Box>
-    )
+    );
   }
 
   if (error) {
@@ -42,11 +43,11 @@ const CashworxsAdminDashboard = () => {
       <Alert severity='error' sx={{ mb: 4 }}>
         {error}
       </Alert>
-    )
+    );
   }
 
   if (!stats) {
-    return <Alert severity='info'>No dashboard data available</Alert>
+    return <Alert severity='info'>No dashboard data available</Alert>;
   }
 
   return (
@@ -131,7 +132,7 @@ const CashworxsAdminDashboard = () => {
         <RecentTransactions transactions={stats.recent_transactions} />
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
-export default CashworxsAdminDashboard
+export default CashworxsAdminDashboard;

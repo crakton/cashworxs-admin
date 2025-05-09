@@ -1,14 +1,14 @@
 // Component Imports
 
 // Server Action Imports
-import UserActivities from '@/views/users/UserActivities'
-import { getServerMode } from '@core/utils/serverHelpers'
+import UserActivities from '@/views/users/UserActivities';
+import { getServerMode } from '@core/utils/serverHelpers';
 
 const UserActivitiesPage = () => {
   // Vars
-  const mode = getServerMode()
+  const mode = getServerMode();
 
-  return <UserActivities />
-}
+  return <UserActivities />;
+};
 
-export default UserActivitiesPage
+export default UserActivitiesPage;

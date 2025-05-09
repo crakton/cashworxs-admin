@@ -1,27 +1,28 @@
-'use client'
+'use client';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Grid from '@mui/material/Grid'
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
 
 // Component Imports
-import Link from '@components/Link'
-import CustomAvatar from '@core/components/mui/Avatar'
-import OptionMenu from '@core/components/option-menu'
+import Link from '@components/Link';
+import CustomAvatar from '@core/components/mui/Avatar';
+import OptionMenu from '@core/components/option-menu';
+import type { Transaction } from '@/store/slices/dashboardSlice';
 
-const RecentTransactions = ({ transactions = [] }) => {
+const RecentTransactions = ({ transactions }: { transactions: Transaction[] }) => {
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'
-    const date = new Date(dateString)
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
-    })
-  }
+    });
+  };
 
   return (
     <Card>
@@ -59,7 +60,7 @@ const RecentTransactions = ({ transactions = [] }) => {
         ))}
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default RecentTransactions
+export default RecentTransactions;

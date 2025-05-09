@@ -1,6 +1,7 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+
 import {
   Card,
   CardContent,
@@ -21,7 +22,7 @@ import {
   TextField,
   MenuItem,
   Button
-} from '@mui/material'
+} from '@mui/material';
 
 const usersData = [
   {
@@ -42,24 +43,24 @@ const usersData = [
     address: '456 Avenue, Town',
     language: 'Yoruba'
   }
-]
+];
 
 export default function SettingsPage() {
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleEditClick = user => {
-    setSelectedUser({ ...user })
-    setEditDialogOpen(true)
-  }
+    setSelectedUser({ ...user });
+    setEditDialogOpen(true);
+  };
 
   const handleEditChange = (field, value) => {
-    setSelectedUser(prev => ({ ...prev, [field]: value }))
-  }
+    setSelectedUser(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleSaveChanges = () => {
-    setEditDialogOpen(false)
-  }
+    setEditDialogOpen(false);
+  };
 
   return (
     <Card>
@@ -173,5 +174,5 @@ export default function SettingsPage() {
         </DialogActions>
       </Dialog>
     </Card>
-  )
+  );
 }

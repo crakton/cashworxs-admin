@@ -1,35 +1,37 @@
-'use client'
+'use client';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
 
 // Component Imports
-import Link from '@components/Link'
-import CustomAvatar from '@core/components/mui/Avatar'
-import { User } from '@/store/slices/userSlice'
+import Link from '@components/Link';
+import CustomAvatar from '@core/components/mui/Avatar';
+import type { User } from '@/store/slices/userSlice';
 
 const RecentUsers = ({ users = [] }: { users: User[] }) => {
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'
-    const date = new Date(dateString)
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
-    })
-  }
+    });
+  };
 
   const getInitials = (name: string) => {
-    if (!name) return 'U'
+    if (!name) return 'U';
+
     return name
       .split(' ')
       .map(part => part[0])
       .join('')
-      .toUpperCase()
-  }
+      .toUpperCase();
+  };
 
   const getRandomColor = (str: string) => {
     const colors: ('primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info')[] = [
@@ -39,12 +41,14 @@ const RecentUsers = ({ users = [] }: { users: User[] }) => {
       'error',
       'warning',
       'info'
-    ]
+    ];
 
     // Simple hash function to choose a color based on the string
-    const hash = str.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-    return colors[hash % colors.length]
-  }
+    const hash = str.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+    return colors[hash % colors.length];
+  };
+
   return (
     <Card>
       <CardHeader
@@ -78,7 +82,7 @@ const RecentUsers = ({ users = [] }: { users: User[] }) => {
         ))}
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default RecentUsers
+export default RecentUsers;

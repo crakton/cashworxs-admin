@@ -1,7 +1,9 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useEffect, useState } from 'react';
+
+import Link from 'next/link';
+
 import {
   Card,
   CardHeader,
@@ -18,46 +20,47 @@ import {
   Typography,
   Chip,
   TablePagination
-} from '@mui/material'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { fetchAllInvoices } from '@/store/slices/invoicesSlice'
-import { formateNumber } from '@/utils/formatDate'
+} from '@mui/material';
+
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { fetchAllInvoices } from '@/store/slices/invoicesSlice';
+import { formateNumber } from '@/utils/formatDate';
 
 const InvoicesPage = () => {
-  const dispatch = useAppDispatch()
-  const { invoices, isLoading } = useAppSelector(state => state.invoices)
+  const dispatch = useAppDispatch();
+  const { invoices, isLoading } = useAppSelector(state => state.invoices);
 
   // Pagination states
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
-    dispatch(fetchAllInvoices())
-  }, [dispatch])
+    dispatch(fetchAllInvoices());
+  }, [dispatch]);
 
   const getStatusColor = (status: number) => {
     switch (status) {
       case 1:
-        return 'success'
+        return 'success';
       case 0:
-        return 'warning'
+        return 'warning';
       default:
-        return 'error'
+        return 'error';
     }
-  }
+  };
 
   // Pagination handlers
   const handleChangePage = (_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
-    setPage(newPage)
-  }
+    setPage(newPage);
+  };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
-  }
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   // Apply pagination to the invoices data
-  const paginatedInvoices = invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  const paginatedInvoices = invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <Grid container spacing={6}>
@@ -65,6 +68,7 @@ const InvoicesPage = () => {
         <Card>
           <CardHeader
             title='Invoices'
+
             // action={
             //   <Button variant='contained' component={Link} href='/invoices/new'>
             //     <i className='ri ri-file-add-line'></i>
@@ -141,7 +145,7 @@ const InvoicesPage = () => {
         </Card>
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
-export default InvoicesPage
+export default InvoicesPage;

@@ -1,9 +1,10 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import axios from 'axios'
-import Cookies from 'js-cookie'
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 // Define API base URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 // Types
 export interface Invoice {
@@ -104,83 +105,86 @@ const initialState: PaymentsState = {
   currentPayment: null,
   isLoading: false,
   error: null
-}
+};
 
 // Async thunks
 export const fetchAllPayments = createAsyncThunk('payments/fetchAll', async (_, { rejectWithValue }) => {
   try {
-    const token = Cookies.get('auth_token')
+    const token = Cookies.get('auth_token');
 
     if (!token) {
-      return rejectWithValue('No token found')
+      return rejectWithValue('No token found');
     }
 
     const response = await axios.get(`${API_URL}/platforms/payments`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
-    })
+    });
 
-    return response.data.data.payments
+    return response.data.data.payments;
   } catch (error: any) {
     if (error.response?.status === 401) {
-      Cookies.remove('auth_token')
+      Cookies.remove('auth_token');
     }
-    return rejectWithValue(error.response?.data?.message || 'Failed to fetch payments')
+
+    return rejectWithValue(error.response?.data?.message || 'Failed to fetch payments');
   }
-})
+});
 
 export const fetchPaymentDetails = createAsyncThunk(
   'payments/fetchDetails',
   async (invoiceNumber: string, { rejectWithValue }) => {
     try {
-      const token = Cookies.get('auth_token')
+      const token = Cookies.get('auth_token');
 
       if (!token) {
-        return rejectWithValue('No token found')
+        return rejectWithValue('No token found');
       }
 
       const response = await axios.get(`${API_URL}/platforms/payments/${invoiceNumber}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
-      })
+      });
 
-      return response.data.data
+      return response.data.data;
     } catch (error: any) {
       if (error.response?.status === 401) {
-        Cookies.remove('auth_token')
+        Cookies.remove('auth_token');
       }
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch payment details')
+
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch payment details');
     }
   }
-)
+);
 
 export const processPayment = createAsyncThunk(
   'payments/processPayment',
   async (paymentData: any, { rejectWithValue }) => {
     try {
-      const token = Cookies.get('auth_token')
+      const token = Cookies.get('auth_token');
 
       if (!token) {
-        return rejectWithValue('No token found')
+        return rejectWithValue('No token found');
       }
 
       const response = await axios.post(`${API_URL}/platforms/payments`, paymentData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
-      })
+      });
 
-      return response.data.data
+      return response.data.data;
     } catch (error: any) {
       if (error.response?.status === 401) {
-        Cookies.remove('auth_token')
+        Cookies.remove('auth_token');
       }
-      return rejectWithValue(error.response?.data?.message || 'Failed to process payment')
+
+      return rejectWithValue(error.response?.data?.message || 'Failed to process payment');
     }
   }
-)
+);
 
 // Payments slice
 const paymentsSlice = createSlice({
@@ -188,60 +192,60 @@ const paymentsSlice = createSlice({
   initialState,
   reducers: {
     clearPaymentError: state => {
-      state.error = null
+      state.error = null;
     },
     clearCurrentPayment: state => {
-      state.currentPayment = null
+      state.currentPayment = null;
     }
   },
   extraReducers: builder => {
     // Fetch all payments
     builder.addCase(fetchAllPayments.pending, state => {
-      state.isLoading = true
-      state.error = null
-    })
+      state.isLoading = true;
+      state.error = null;
+    });
     builder.addCase(fetchAllPayments.fulfilled, (state, action: PayloadAction<Payment[]>) => {
-      state.isLoading = false
-      state.payments = action.payload
-      state.error = null
-    })
+      state.isLoading = false;
+      state.payments = action.payload;
+      state.error = null;
+    });
     builder.addCase(fetchAllPayments.rejected, (state, action) => {
-      state.isLoading = false
-      state.error = action.payload as string
-    })
+      state.isLoading = false;
+      state.error = action.payload as string;
+    });
 
     // Fetch payment details
     builder.addCase(fetchPaymentDetails.pending, state => {
-      state.isLoading = true
-      state.error = null
-    })
+      state.isLoading = true;
+      state.error = null;
+    });
     builder.addCase(fetchPaymentDetails.fulfilled, (state, action: PayloadAction<Payment>) => {
-      state.isLoading = false
-      state.currentPayment = action.payload
-      state.error = null
-    })
+      state.isLoading = false;
+      state.currentPayment = action.payload;
+      state.error = null;
+    });
     builder.addCase(fetchPaymentDetails.rejected, (state, action) => {
-      state.isLoading = false
-      state.error = action.payload as string
-    })
+      state.isLoading = false;
+      state.error = action.payload as string;
+    });
 
     // Process payment
     builder.addCase(processPayment.pending, state => {
-      state.isLoading = true
-      state.error = null
-    })
+      state.isLoading = true;
+      state.error = null;
+    });
     builder.addCase(processPayment.fulfilled, (state, action: PayloadAction<Payment>) => {
-      state.isLoading = false
-      state.payments = [...state.payments, action.payload]
-      state.error = null
-    })
+      state.isLoading = false;
+      state.payments = [...state.payments, action.payload];
+      state.error = null;
+    });
     builder.addCase(processPayment.rejected, (state, action) => {
-      state.isLoading = false
-      state.error = action.payload as string
-    })
+      state.isLoading = false;
+      state.error = action.payload as string;
+    });
   }
-})
+});
 
-export const { clearPaymentError, clearCurrentPayment } = paymentsSlice.actions
+export const { clearPaymentError, clearCurrentPayment } = paymentsSlice.actions;
 
-export default paymentsSlice.reducer
+export default paymentsSlice.reducer;

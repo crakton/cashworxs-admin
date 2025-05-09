@@ -1,39 +1,41 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react';
+
+import { useRouter } from 'next/navigation';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import TextField from '@mui/material/TextField'
-import Alert from '@mui/material/Alert'
-import AlertTitle from '@mui/material/AlertTitle'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormHelperText from '@mui/material/FormHelperText'
-import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider'
-import CircularProgress from '@mui/material/CircularProgress'
-import Breadcrumbs from '@mui/material/Breadcrumbs'
-import Link from '@mui/material/Link'
-import Paper from '@mui/material/Paper'
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import TextField from '@mui/material/TextField';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import type { SelectChangeEvent } from '@mui/material/Select';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormHelperText from '@mui/material/FormHelperText';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import CircularProgress from '@mui/material/CircularProgress';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Link from '@mui/material/Link';
+import Paper from '@mui/material/Paper';
 
 // Redux Imports
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { createServiceFee, fetchOrganizations } from '@/store/slices/feesSlice'
-import { nigerianStates } from '@/libs/constant'
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { createServiceFee, fetchOrganizations } from '@/store/slices/feesSlice';
+import { nigerianStates } from '@/libs/constant';
 
 const CreateFeeServicePage = () => {
-  const router = useRouter()
-  const dispatch = useAppDispatch()
-  const { isLoading, error, organizations } = useAppSelector(state => state.fees)
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { isLoading, error, organizations } = useAppSelector(state => state.fees);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -47,102 +49,108 @@ const CreateFeeServicePage = () => {
       payment_type: '',
       payment_support: []
     }
-  })
+  });
 
   const [formErrors, setFormErrors] = useState({
     name: '',
     amount: '',
     organization_id: ''
-  })
+  });
 
-  const [successMessage, setSuccessMessage] = useState('')
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Fetch organizations when component mounts
   useEffect(() => {
-    dispatch(fetchOrganizations())
-  }, [dispatch])
+    dispatch(fetchOrganizations());
+  }, [dispatch]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
+    }));
 
     // Clear validation error when user types
     if (name in formErrors) {
       setFormErrors(prev => ({
         ...prev,
         [name]: ''
-      }))
+      }));
     }
-  }
+  };
+
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
+    }));
 
     // Clear validation error when user types
     if (name in formErrors) {
       setFormErrors(prev => ({
         ...prev,
         [name]: ''
-      }))
+      }));
     }
-  }
+  };
 
   const handleStatusChange = (e: SelectChangeEvent<string>) => {
     setFormData(prev => ({
       ...prev,
       status: e.target.value === 'active' ? 1 : 0
-    }))
-  }
+    }));
+  };
 
   const handleMetadataChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       metadata: {
         ...prev.metadata,
         [name]: value
       }
-    }))
-  }
+    }));
+  };
 
   const validateForm = () => {
     const errors = {
       name: '',
       amount: '',
       organization_id: ''
-    }
-    let isValid = true
+    };
+
+    let isValid = true;
 
     if (!formData.name.trim()) {
-      errors.name = 'Fee service name is required'
-      isValid = false
+      errors.name = 'Fee service name is required';
+      isValid = false;
     }
 
     if (!formData.amount) {
-      errors.amount = 'Amount is required'
-      isValid = false
+      errors.amount = 'Amount is required';
+      isValid = false;
     }
 
     if (!formData.organization_id) {
-      errors.organization_id = 'Organization is required'
-      isValid = false
+      errors.organization_id = 'Organization is required';
+      isValid = false;
     }
 
-    setFormErrors(errors)
-    return isValid
-  }
+    setFormErrors(errors);
+
+    return isValid;
+  };
 
   const handleSubmit = async (e: any) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
     try {
@@ -151,9 +159,9 @@ const CreateFeeServicePage = () => {
           ...formData,
           amount: formData.amount.toString()
         })
-      ).unwrap()
+      ).unwrap();
 
-      setSuccessMessage('Fee service created successfully')
+      setSuccessMessage('Fee service created successfully');
 
       // Reset form after successful creation
       setFormData({
@@ -168,20 +176,20 @@ const CreateFeeServicePage = () => {
           payment_type: '',
           payment_support: []
         }
-      })
+      });
 
       // Redirect after short delay
       setTimeout(() => {
-        router.push('/services/fees')
-      }, 1500)
+        router.push('/services/fees');
+      }, 1500);
     } catch (err) {
-      console.error('Failed to create fee service:', err)
+      console.error('Failed to create fee service:', err);
     }
-  }
+  };
 
   const handleCancel = () => {
-    router.back()
-  }
+    router.back();
+  };
 
   return (
     <Grid container spacing={6}>
@@ -395,7 +403,7 @@ const CreateFeeServicePage = () => {
         </Card>
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
-export default CreateFeeServicePage
+export default CreateFeeServicePage;

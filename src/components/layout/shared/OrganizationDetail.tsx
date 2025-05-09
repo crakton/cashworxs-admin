@@ -1,72 +1,79 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
+import { useState, useEffect } from 'react';
+
+import { useRouter } from 'next/navigation';
+
+// MUI Imports
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import Chip from '@mui/material/Chip';
+import LinearProgress from '@mui/material/LinearProgress';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TablePagination from '@mui/material/TablePagination';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import type { SelectChangeEvent } from '@mui/material/Select';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormHelperText from '@mui/material/FormHelperText';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import InputAdornment from '@mui/material/InputAdornment';
+import Snackbar from '@mui/material/Snackbar';
+
+import { addServiceItem } from '@/store/slices/feesSlice';
+import type { CreateServiceItemDTO } from '@/store/slices/feesSlice';
+
 import {
   fetchOrganizationById,
   clearError,
   clearCurrentOrganization,
   fetchOrganizationServices
-} from '@/store/slices/organizationsSlice'
-import { addServiceItem, CreateServiceItemDTO } from '@/store/slices/feesSlice'
-
-// MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Alert from '@mui/material/Alert'
-import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider'
-import Chip from '@mui/material/Chip'
-import LinearProgress from '@mui/material/LinearProgress'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemText from '@mui/material/ListItemText'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import Paper from '@mui/material/Paper'
-import IconButton from '@mui/material/IconButton'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import TablePagination from '@mui/material/TablePagination'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
-import TextField from '@mui/material/TextField'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormHelperText from '@mui/material/FormHelperText'
-import Switch from '@mui/material/Switch'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import InputAdornment from '@mui/material/InputAdornment'
-import Snackbar from '@mui/material/Snackbar'
-import { nigerianStates } from '@/libs/constant'
+} from '@/store/slices/organizationsSlice';
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { nigerianStates } from '@/libs/constant';
 
 interface OrganizationDetailProps {
   organizationId: string
 }
 
 const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
-  const router = useRouter()
-  const dispatch = useAppDispatch()
-  const { isLoading, error, currentOrganization, services } = useAppSelector(state => state.organizations)
-  console.log('services', services)
-  const [servicesPage, setServicesPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(5)
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { isLoading, error, currentOrganization, services } = useAppSelector(state => state.organizations);
+
+  console.log('services', services);
+  const [servicesPage, setServicesPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   // Modal state
-  const [openModal, setOpenModal] = useState(false)
+  const [openModal, setOpenModal] = useState(false);
+
   const [newServiceItem, setNewServiceItem] = useState<Partial<CreateServiceItemDTO>>({
     name: '',
     type: 'Fee',
@@ -78,41 +85,43 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
       payment_support: ['card', 'bank'],
       payment_type: 'onetime'
     }
-  })
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  const [successMessage, setSuccessMessage] = useState('')
-  const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false)
+  });
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
 
   // Fetch organization data
   useEffect(() => {
     if (organizationId) {
-      dispatch(fetchOrganizationById(organizationId))
-      dispatch(fetchOrganizationServices(organizationId))
+      dispatch(fetchOrganizationById(organizationId));
+      dispatch(fetchOrganizationServices(organizationId));
     }
 
     // Clear current organization when unmounting
     return () => {
-      dispatch(clearCurrentOrganization())
-      dispatch(clearError())
-    }
-  }, [dispatch, organizationId])
+      dispatch(clearCurrentOrganization());
+      dispatch(clearError());
+    };
+  }, [dispatch, organizationId]);
 
   // Handle page change for services table
   const handleChangePage = (_event: unknown, newPage: number) => {
-    setServicesPage(newPage)
-  }
+    setServicesPage(newPage);
+  };
 
   // Handle rows per page change
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setServicesPage(0)
-  }
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setServicesPage(0);
+  };
 
   // Modal handlers
-  const handleOpenModal = () => setOpenModal(true)
+  const handleOpenModal = () => setOpenModal(true);
+
   const handleCloseModal = () => {
-    setOpenModal(false)
-    setFormErrors({})
+    setOpenModal(false);
+    setFormErrors({});
     setNewServiceItem({
       name: '',
       type: '',
@@ -124,55 +133,58 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
         payment_support: ['card', 'bank'],
         payment_type: 'onetime'
       }
-    })
-  }
+    });
+  };
 
   // Form handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setNewServiceItem(prev => ({ ...prev, [name]: value }))
+    const { name, value } = e.target;
+
+    setNewServiceItem(prev => ({ ...prev, [name]: value }));
 
     // Clear error when field is being edited
     if (formErrors[name]) {
-      setFormErrors(prev => ({ ...prev, [name]: '' }))
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
     }
-  }
+  };
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    const name = e.target.name as string
-    const value = e.target.value
-    setNewServiceItem(prev => ({ ...prev, [name]: value }))
+    const name = e.target.name as string;
+    const value = e.target.value;
+
+    setNewServiceItem(prev => ({ ...prev, [name]: value }));
 
     // Clear error when field is being edited
     if (formErrors[name]) {
-      setFormErrors(prev => ({ ...prev, [name]: '' }))
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
     }
-  }
+  };
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewServiceItem(prev => ({ ...prev, status: e.target.checked }))
-  }
+    setNewServiceItem(prev => ({ ...prev, status: e.target.checked }));
+  };
 
   const validateForm = () => {
-    const errors: Record<string, string> = {}
+    const errors: Record<string, string> = {};
 
     if (!newServiceItem.name?.trim()) {
-      errors.name = 'Name is required'
+      errors.name = 'Name is required';
     }
 
     if (!newServiceItem.amount) {
-      errors.amount = 'Amount is required'
+      errors.amount = 'Amount is required';
     } else if (isNaN(Number(newServiceItem.amount))) {
-      errors.amount = 'Amount must be a valid number'
+      errors.amount = 'Amount must be a valid number';
     }
 
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
+    setFormErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      return
+      return;
     }
 
     try {
@@ -181,40 +193,40 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
           ...(newServiceItem as CreateServiceItemDTO),
           organization_id: currentOrganization.id,
           status: newServiceItem.status ? 1 : 0
-        }
+        };
 
-        await dispatch(addServiceItem(serviceData)).unwrap()
+        await dispatch(addServiceItem(serviceData)).unwrap();
 
         // Show success message
-        setSuccessMessage('Service item created successfully')
-        setShowSuccessSnackbar(true)
+        setSuccessMessage('Service item created successfully');
+        setShowSuccessSnackbar(true);
 
         // Refresh services list
-        dispatch(fetchOrganizationServices(organizationId))
+        dispatch(fetchOrganizationServices(organizationId));
 
         // Close modal
-        handleCloseModal()
+        handleCloseModal();
       }
     } catch (err: any) {
       // Handle the error from the API
       if (typeof err === 'string') {
-        setFormErrors(prev => ({ ...prev, form: err }))
+        setFormErrors(prev => ({ ...prev, form: err }));
       } else {
-        setFormErrors(prev => ({ ...prev, form: 'Failed to create service item' }))
+        setFormErrors(prev => ({ ...prev, form: 'Failed to create service item' }));
       }
     }
-  }
+  };
 
   const handleCloseSnackbar = () => {
-    setShowSuccessSnackbar(false)
-  }
+    setShowSuccessSnackbar(false);
+  };
 
   if (isLoading) {
     return (
       <Box sx={{ width: '100%', mt: 4 }}>
         <LinearProgress />
       </Box>
-    )
+    );
   }
 
   if (error) {
@@ -222,7 +234,7 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
       <Alert severity='error' sx={{ mt: 4 }} onClose={() => dispatch(clearError())}>
         {error}
       </Alert>
-    )
+    );
   }
 
   if (!currentOrganization) {
@@ -230,7 +242,7 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
       <Alert severity='info' sx={{ mt: 4 }}>
         Organization not found
       </Alert>
-    )
+    );
   }
 
   return (
@@ -516,7 +528,7 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
                         ...prev.metadata,
                         payment_type: e.target.value as string
                       }
-                    }))
+                    }));
                   }}
                 >
                   <MenuItem value='onetime'>One-time</MenuItem>
@@ -570,7 +582,7 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
         }
       />
     </Grid>
-  )
-}
+  );
+};
 
-export default OrganizationDetail
+export default OrganizationDetail;

@@ -1,37 +1,38 @@
-'use client'
+'use client';
 
 // React Imports
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
 // Next Imports
-import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
-import LinearProgress from '@mui/material/LinearProgress'
-import Alert from '@mui/material/Alert'
-import Box from '@mui/material/Box'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import CardHeader from '@mui/material/CardHeader';
+import LinearProgress from '@mui/material/LinearProgress';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+
 // Redux Imports
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import { clearCurrentUser, fetchUserById, fetchUserTransactions, updateUser } from '@/store/slices/userSlice'
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { clearCurrentUser, fetchUserById, fetchUserTransactions, updateUser } from '@/store/slices/userSlice';
 
 // Custom Tab Panel Component
 interface TabPanelProps {
@@ -41,7 +42,7 @@ interface TabPanelProps {
 }
 
 function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props
+  const { children, value, index, ...other } = props;
 
   return (
     <div
@@ -53,76 +54,86 @@ function TabPanel(props: TabPanelProps) {
     >
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
-  )
+  );
 }
 
 const UserDetailPage = () => {
   // Hooks
-  const router = useRouter()
-  const { id } = useParams() as { id: string }
-  const dispatch = useAppDispatch()
-  const { currentUser, isLoading, error, transactions } = useAppSelector(state => state.users)
+  const router = useRouter();
+  const { id } = useParams() as { id: string };
+  const dispatch = useAppDispatch();
+  const { currentUser, isLoading, error, transactions } = useAppSelector(state => state.users);
+
   // State
-  const [tabValue, setTabValue] = useState(0)
+  const [tabValue, setTabValue] = useState(0);
+
   const [formData, setFormData] = useState({
     full_name: '',
+
     // email: '',
     phone_number: ''
+
     // role: ''
-  })
+  });
+
   const [formErrors, setFormErrors] = useState({
     full_name: '',
+
     // email: '',
     phone_number: ''
-  })
+  });
 
   // Effects
   useEffect(() => {
     if (id) {
-      dispatch(fetchUserById(id))
-      dispatch(fetchUserTransactions())
+      dispatch(fetchUserById(id));
+      dispatch(fetchUserTransactions());
     }
 
     // Clean up
     return () => {
-      dispatch(clearCurrentUser())
-    }
-  }, [dispatch, id])
+      dispatch(clearCurrentUser());
+    };
+  }, [dispatch, id]);
 
   useEffect(() => {
     if (currentUser) {
       setFormData({
         full_name: currentUser.full_name || '',
+
         // email: currentUser.email || '',
         phone_number: currentUser.phone_number || ''
+
         // role: currentUser.role || 'user'
-      })
+      });
     }
-  }, [currentUser])
+  }, [currentUser]);
 
   // Handlers
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue)
-  }
+    setTabValue(newValue);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
+
     if (name) {
-      setFormData(prev => ({ ...prev, [name]: value }))
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
-  }
+  };
 
   const validateForm = () => {
-    let isValid = true
+    let isValid = true;
+
     const errors = {
       full_name: '',
       email: '',
       phone_number: ''
-    }
+    };
 
     if (!formData.full_name) {
-      errors.full_name = 'Name is required'
-      isValid = false
+      errors.full_name = 'Name is required';
+      isValid = false;
     }
 
     // if (!formData.email) {
@@ -134,28 +145,29 @@ const UserDetailPage = () => {
     // }
 
     if (formData.phone_number && !/^\d{10,15}$/.test(formData.phone_number)) {
-      errors.phone_number = 'Phone number must be between 10-15 digits'
-      isValid = false
+      errors.phone_number = 'Phone number must be between 10-15 digits';
+      isValid = false;
     }
 
-    setFormErrors(errors)
-    return isValid
-  }
+    setFormErrors(errors);
+
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
     if (id) {
-      await dispatch(updateUser({ userId: id, userData: formData }))
+      await dispatch(updateUser({ userId: id, userData: formData }));
     }
-  }
+  };
 
   if (isLoading && !currentUser) {
-    return <LinearProgress />
+    return <LinearProgress />;
   }
 
   return (
@@ -290,7 +302,7 @@ const UserDetailPage = () => {
         </Card>
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
-export default UserDetailPage
+export default UserDetailPage;
