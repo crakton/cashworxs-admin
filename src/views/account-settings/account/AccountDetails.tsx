@@ -1,22 +1,24 @@
-'use client';
+'use client'
 
+// Next Imports
+import Image from 'next/image'
 // React Imports
-import { useState } from 'react';
-import type { ChangeEvent } from 'react';
+import { useState } from 'react'
+import type { ChangeEvent } from 'react'
 
 // MUI Imports
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import Chip from '@mui/material/Chip';
-import type { SelectChangeEvent } from '@mui/material/Select';
+import Grid from '@mui/material/Grid'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import Chip from '@mui/material/Chip'
+import type { SelectChangeEvent } from '@mui/material/Select'
 
 type Data = {
   firstName: string
@@ -31,7 +33,7 @@ type Data = {
   language: string
   timezone: string
   currency: string
-};
+}
 
 // Vars
 const initialData: Data = {
@@ -47,53 +49,53 @@ const initialData: Data = {
   language: 'arabic',
   timezone: 'gmt-12',
   currency: 'usd'
-};
+}
 
-const languageData = ['English', 'Arabic', 'French', 'German', 'Portuguese'];
+const languageData = ['English', 'Arabic', 'French', 'German', 'Portuguese']
 
 const AccountDetails = () => {
   // States
-  const [formData, setFormData] = useState<Data>(initialData);
-  const [fileInput, setFileInput] = useState<string>('');
-  const [imgSrc, setImgSrc] = useState<string>('/images/avatars/1.png');
-  const [language, setLanguage] = useState<string[]>(['English']);
+  const [formData, setFormData] = useState<Data>(initialData)
+  const [fileInput, setFileInput] = useState<string>('')
+  const [imgSrc, setImgSrc] = useState<string>('/images/avatars/1.png')
+  const [language, setLanguage] = useState<string[]>(['English'])
 
   const handleDelete = (value: string) => {
-    setLanguage(current => current.filter(item => item !== value));
-  };
+    setLanguage(current => current.filter(item => item !== value))
+  }
 
   const handleChange = (event: SelectChangeEvent<string[]>) => {
-    setLanguage(event.target.value as string[]);
-  };
+    setLanguage(event.target.value as string[])
+  }
 
   const handleFormChange = (field: keyof Data, value: Data[keyof Data]) => {
-    setFormData({ ...formData, [field]: value });
-  };
+    setFormData({ ...formData, [field]: value })
+  }
 
   const handleFileInputChange = (file: ChangeEvent) => {
-    const reader = new FileReader();
-    const { files } = file.target as HTMLInputElement;
+    const reader = new FileReader()
+    const { files } = file.target as HTMLInputElement
 
     if (files && files.length !== 0) {
-      reader.onload = () => setImgSrc(reader.result as string);
-      reader.readAsDataURL(files[0]);
+      reader.onload = () => setImgSrc(reader.result as string)
+      reader.readAsDataURL(files[0])
 
       if (reader.result !== null) {
-        setFileInput(reader.result as string);
+        setFileInput(reader.result as string)
       }
     }
-  };
+  }
 
   const handleFileInputReset = () => {
-    setFileInput('');
-    setImgSrc('/images/avatars/1.png');
-  };
+    setFileInput('')
+    setImgSrc('/images/avatars/1.png')
+  }
 
   return (
     <Card>
       <CardContent className='mbe-5'>
         <div className='flex max-sm:flex-col items-center gap-6'>
-          <img height={100} width={100} className='rounded' src={imgSrc} alt='Profile' />
+          <Image height={100} width={100} className='rounded' src={imgSrc} alt='Profile' />
           <div className='flex flex-grow flex-col gap-4'>
             <div className='flex flex-col sm:flex-row gap-4'>
               <Button component='label' size='small' variant='contained' htmlFor='account-settings-upload-image'>
@@ -295,7 +297,7 @@ const AccountDetails = () => {
         </form>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default AccountDetails;
+export default AccountDetails

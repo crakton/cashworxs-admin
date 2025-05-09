@@ -1,13 +1,16 @@
-'use client';
+'use client'
+
+// Next Imports
+import Image from 'next/image'
 
 // MUI Imports
-import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import Rating from '@mui/material/Rating';
-import CardActions from '@mui/material/CardActions';
-import Button from '@mui/material/Button';
+import Card from '@mui/material/Card'
+import Grid from '@mui/material/Grid'
+import CardContent from '@mui/material/CardContent'
+import Typography from '@mui/material/Typography'
+import Rating from '@mui/material/Rating'
+import CardActions from '@mui/material/CardActions'
+import Button from '@mui/material/Button'
 
 const CardHorizontalRatings = () => {
   return (
@@ -34,12 +37,12 @@ const CardHorizontalRatings = () => {
         </Grid>
         <Grid item xs={12} md={6} lg={5} className='flex items-center justify-center md:order-[unset] -order-1'>
           <CardContent className='flex items-center justify-center'>
-            <img src='/images/cards/5.png' height='175' className='rounded' />
+            <Image src='/images/cards/5.png' height='175' className='rounded' alt='user-card' />
           </CardContent>
         </Grid>
       </Grid>
     </Card>
-  );
-};
+  )
+}
 
-export default CardHorizontalRatings;
+export default CardHorizontalRatings

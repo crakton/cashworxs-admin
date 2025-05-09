@@ -28,14 +28,6 @@ import Link from '@mui/material/Link';
 import LinearProgress from '@mui/material/LinearProgress';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import Chip from '@mui/material/Chip';
-import Table from '@mui/material/Table';
-import TableHead from '@mui/material/TableHead';
-import TableBody from '@mui/material/TableBody';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -478,77 +470,6 @@ const EditFeeServicePage = () => {
                   </Grid>
                 </Grid>
               </form>
-            )}
-
-            {tabValue === 1 && (
-              <>
-                {/* <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant='h6'>Manage Service Items</Typography>
-                  <Button
-                    variant='contained'
-                    startIcon={<i className='ri ri-add-line'></i>}
-                    onClick={handleOpenServiceDialog}
-                  >
-                    Add Service Item
-                  </Button>
-                </Box> */}
-
-                {/* {originalFee.services && originalFee.services.length > 0 ? (
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Type</TableCell>
-                        <TableCell>Amount</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Payment Type</TableCell>
-                        <TableCell>Actions</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {originalFee.services.map(service => (
-                        <TableRow key={service.id} hover>
-                          <TableCell>{service.name}</TableCell>
-                          <TableCell>{service.type}</TableCell>
-                          <TableCell>{service.amount}</TableCell>
-                          <TableCell>
-                            <Chip
-                              label={getStatusLabel(service.status)}
-                              color={getStatusColor(service.status)}
-                              size='small'
-                            />
-                          </TableCell>
-                          <TableCell>{service.metadata?.payment_type || 'N/A'}</TableCell>
-                          <TableCell>
-                            <Tooltip title='Edit'>
-                              <IconButton
-                                size='small'
-                                color='primary'
-                                onClick={() => handleOpenEditServiceDialog(service.id)}
-                              >
-                                <i className='ri ri-edit-line'></i>
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title='Delete'>
-                              <IconButton
-                                size='small'
-                                color='error'
-                                onClick={() => openDeleteDialog(service.id, service.name)}
-                              >
-                                <i className='ri ri-delete-bin-line'></i>
-                              </IconButton>
-                            </Tooltip>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <Alert severity='info' sx={{ mb: 4 }}>
-                    No service items found for this fee service. Click the "Add Service Item" button to add one.
-                  </Alert>
-                )} */}
-              </>
             )}
           </CardContent>
         </Card>

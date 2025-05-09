@@ -1,19 +1,22 @@
+// Next Imports
+import Image from 'next/image'
+
 // MUI Imports
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card'
+import CardHeader from '@mui/material/CardHeader'
+import CardContent from '@mui/material/CardContent'
+import Typography from '@mui/material/Typography'
+import Grid from '@mui/material/Grid'
 
 // Component Imports
-import Link from '@components/Link';
+import Link from '@components/Link'
 
 type DataType = {
   logo: string
   title: string
   amount: string
   subtitle: string
-};
+}
 
 // Vars
 const depositData: DataType[] = [
@@ -47,7 +50,7 @@ const depositData: DataType[] = [
     subtitle: 'Wallet deposit',
     logo: '/images/logos/citi-bank.png'
   }
-];
+]
 
 const withdrawData = [
   {
@@ -80,7 +83,7 @@ const withdrawData = [
     logo: '/images/logos/aws.png',
     subtitle: 'Choosing a Cloud Platform'
   }
-];
+]
 
 const DepositWithdraw = () => {
   return (
@@ -98,7 +101,7 @@ const DepositWithdraw = () => {
           <CardContent className='flex flex-col gap-5'>
             {depositData.map((item, index) => (
               <div key={index} className='flex items-center gap-4'>
-                <img src={item.logo} alt={item.title} width={30} />
+                <Image src={item.logo} alt={item.title} width={30} />
                 <div className='flex justify-between items-center is-full flex-wrap gap-x-4 gap-y-2'>
                   <div className='flex flex-col gap-0.5'>
                     <Typography color='text.primary' className='font-medium'>
@@ -126,7 +129,7 @@ const DepositWithdraw = () => {
           <CardContent className='flex flex-col gap-5'>
             {withdrawData.map((item, index) => (
               <div key={index} className='flex items-center gap-4'>
-                <img src={item.logo} alt={item.title} width={30} />
+                <Image src={item.logo} alt={item.title} width={30} />
                 <div className='flex justify-between items-center is-full flex-wrap gap-x-4 gap-y-2'>
                   <div className='flex flex-col gap-0.5'>
                     <Typography color='text.primary' className='font-medium'>
@@ -144,7 +147,7 @@ const DepositWithdraw = () => {
         </Grid>
       </Grid>
     </Card>
-  );
-};
+  )
+}
 
-export default DepositWithdraw;
+export default DepositWithdraw
