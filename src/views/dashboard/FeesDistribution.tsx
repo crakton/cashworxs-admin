@@ -1,40 +1,41 @@
-'use client';
+'use client'
 
 // Next Imports
-import dynamic from 'next/dynamic';
+import dynamic from 'next/dynamic'
 
 // MUI Imports
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import CardHeader from '@mui/material/CardHeader'
+import Typography from '@mui/material/Typography'
+import { useTheme } from '@mui/material/styles'
 
 // Third-party Imports
-import type { ApexOptions } from 'apexcharts';
+import type { ApexOptions } from 'apexcharts'
+import { DashboardStats } from '@/store/slices/dashboardSlice'
 
 // Styled Component Imports
-const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'));
+const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
-const FeesDistribution = ({ dashboardData }) => {
+const FeesDistribution = ({ dashboardData }: { dashboardData: DashboardStats }) => {
   // Hooks
-  const theme = useTheme();
+  const theme = useTheme()
 
   // Calculate percentages based on total fees
-  const totalFeesCount = dashboardData?.total_fees || 0;
-  const totalTaxesCount = dashboardData?.total_taxes || 0;
-  const totalServiceFeesCount = dashboardData?.total_service_fees || 0;
-  const totalServiceTaxesCount = dashboardData?.total_service_taxes || 0;
+  const totalFeesCount = dashboardData?.total_fees || 0
+  const totalTaxesCount = dashboardData?.total_taxes || 0
+  const totalServiceFeesCount = dashboardData?.total_service_fees || 0
+  const totalServiceTaxesCount = dashboardData?.total_service_taxes || 0
 
-  const total = totalFeesCount + totalTaxesCount + totalServiceFeesCount;
+  const total = totalFeesCount + totalTaxesCount + totalServiceFeesCount
 
-  const feePercentage = total > 0 ? Math.round((totalFeesCount / total) * 100) : 0;
-  const taxPercentage = total > 0 ? Math.round((totalTaxesCount / total) * 100) : 0;
-  const serviceFeesPercentage = total > 0 ? Math.round((totalServiceFeesCount / total) * 100) : 0;
-  const serviceTaxesPercentage = total > 0 ? Math.round((totalServiceTaxesCount / total) * 100) : 0;
+  const feePercentage = total > 0 ? Math.round((totalFeesCount / total) * 100) : 0
+  const taxPercentage = total > 0 ? Math.round((totalTaxesCount / total) * 100) : 0
+  const serviceFeesPercentage = total > 0 ? Math.round((totalServiceFeesCount / total) * 100) : 0
+  const serviceTaxesPercentage = total > 0 ? Math.round((totalServiceTaxesCount / total) * 100) : 0
 
   // Chart data
-  const series = [feePercentage, taxPercentage, serviceFeesPercentage, serviceTaxesPercentage];
+  const series = [feePercentage, taxPercentage, serviceFeesPercentage, serviceTaxesPercentage]
 
   // Chart options
   const options: ApexOptions = {
@@ -105,7 +106,7 @@ const FeesDistribution = ({ dashboardData }) => {
         }
       }
     ]
-  };
+  }
 
   return (
     <Card>
@@ -117,7 +118,7 @@ const FeesDistribution = ({ dashboardData }) => {
         <AppReactApexCharts type='donut' height={300} options={options} series={series} />
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default FeesDistribution;
+export default FeesDistribution

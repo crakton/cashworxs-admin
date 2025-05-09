@@ -9,6 +9,7 @@
     "@typescript-eslint/no-non-null-asserted-optional-chain": "off",
     "react-hooks/exhaustive-deps": "off",
     "@next/next/no-img-element": "off",
-    "jsx-a11y/alt-text": "off"
+    "jsx-a11y/alt-text": "off",
+    "react/display-name": "off"
   }
 }
