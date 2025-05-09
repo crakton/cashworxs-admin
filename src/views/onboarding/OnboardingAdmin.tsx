@@ -91,6 +91,8 @@ const OnboardingAdmin = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
+    console.log('Input changed:', name, value);
+    
     if (currentItem) {
       setCurrentItem({
         ...currentItem,
@@ -134,12 +136,15 @@ const OnboardingAdmin = () => {
   }
 
   const handleSaveItem = async () => {
-    if (!currentItem) return
 
     try {
+    
+    if (!currentItem) return
       if (isNewItem) {
+        
         await dispatch(addOnboardingItem(currentItem)).unwrap()
       } else if (currentItem.id) {
+        console.log('Updating item:', currentItem);
         await dispatch(
           updateOnboardingItem({
             id: currentItem.id,

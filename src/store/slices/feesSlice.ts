@@ -69,7 +69,7 @@ export interface UpdateFeeServiceDTO {
 }
 
 export interface CreateServiceItemDTO {
-  organization_id:string;
+  organization_id: string
   fee_id: string
   name: string
   type: string
@@ -236,7 +236,7 @@ export const addServiceItem = createAsyncThunk(
         return rejectWithValue('No token found')
       }
 
-      const response = await axios.post(`${API_URL}/services/fees/${itemData.fee_id}/items`, itemData, {
+      const response = await axios.post(`${API_URL}/services/fees`, itemData, {
         headers: {
           Authorization: `Bearer ${token}`
         }

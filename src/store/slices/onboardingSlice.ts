@@ -89,13 +89,15 @@ export const updateOnboardingItem = createAsyncThunk(
         return rejectWithValue('No token found')
       }
 
-      const response = await axios.put(`${API_URL}/onboarding/items/${id}`, data, {
+      const { data: response } = await axios.put(`${API_URL}/onboarding/${id}`, data, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       })
 
-      return response.data.data
+      console.log('Updated onboarding data:', response)
+
+      return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to update onboarding item')
     }

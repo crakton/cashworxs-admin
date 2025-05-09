@@ -24,28 +24,10 @@ const FooterContent = () => {
         <span>{`© ${new Date().getFullYear()}, Made with `}</span>
         <span>{`❤️`}</span>
         <span>{` by `}</span>
-        <Link href='https://www.github.com/crakton' target='_blank' className='text-primary'>
-          Crakton
+        <Link href='https://www.cashworx.com.ng' target='_blank' className='text-primary'>
+          CASHWORX
         </Link>
       </p>
-      {/* {!isBreakpointReached && (
-        <div className='flex items-center gap-4'>
-          <Link href='https://themeselection.com/license' target='_blank' className='text-primary'>
-            License
-          </Link>
-          <Link href='https://themeselection.com' target='_blank' className='text-primary'>
-            More Themes
-          </Link>
-
-          <Link
-            href={`https://github.com/themeselection/${process.env.NEXT_PUBLIC_REPO_NAME}/issues`}
-            target='_blank'
-            className='text-primary'
-          >
-            Support
-          </Link>
-        </div>
-      )} */}
     </div>
   )
 }

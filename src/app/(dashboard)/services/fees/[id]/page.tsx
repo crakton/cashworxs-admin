@@ -241,11 +241,11 @@ const FeeDetailsPage = () => {
               </Grid>
             </Grid>
 
-            <Typography variant='h6' sx={{ mt: 4, mb: 2 }}>
+            {/* <Typography variant='h6' sx={{ mt: 4, mb: 2 }}>
               Service Items
-            </Typography>
+            </Typography> */}
 
-            {feeDetails.services && feeDetails.services.length > 0 ? (
+            {/* {feeDetails.services && feeDetails.services.length > 0 ? (
               <TableContainer component={Paper} sx={{ mb: 4 }}>
                 <Table>
                   <TableHead>
@@ -298,18 +298,7 @@ const FeeDetailsPage = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
-            ) : (
-              <Alert severity='info' sx={{ mb: 4 }}>
-                No service items found for this fee service.
-              </Alert>
-            )}
-
-            <Box sx={{ mt: 4 }}>
-              <Button variant='contained' component={Link} href={`/fees/${feeDetails.id}/add-service`}>
-                <i className='ri ri-add-line mr-2'></i>
-                Add Service Item
-              </Button>
-            </Box>
+            ) : null} */}
           </CardContent>
         </Card>
       </Grid>

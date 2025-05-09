@@ -393,7 +393,7 @@ const EditFeeServicePage = () => {
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={tabValue} onChange={handleTabChange} aria-label='fee service tabs'>
               <Tab label='Basic Details' />
-              <Tab label='Service Items' />
+              {/* <Tab label='Service Items' /> */}
             </Tabs>
           </Box>
 
@@ -469,7 +469,7 @@ const EditFeeServicePage = () => {
 
             {tabValue === 1 && (
               <>
-                <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {/* <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant='h6'>Manage Service Items</Typography>
                   <Button
                     variant='contained'
@@ -478,9 +478,9 @@ const EditFeeServicePage = () => {
                   >
                     Add Service Item
                   </Button>
-                </Box>
+                </Box> */}
 
-                {originalFee.services && originalFee.services.length > 0 ? (
+                {/* {originalFee.services && originalFee.services.length > 0 ? (
                   <Table>
                     <TableHead>
                       <TableRow>
@@ -534,7 +534,7 @@ const EditFeeServicePage = () => {
                   <Alert severity='info' sx={{ mb: 4 }}>
                     No service items found for this fee service. Click the "Add Service Item" button to add one.
                   </Alert>
-                )}
+                )} */}
               </>
             )}
           </CardContent>

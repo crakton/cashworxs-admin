@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
 import {
@@ -31,15 +31,27 @@ import Box from '@mui/material/Box'
 import LinearProgress from '@mui/material/LinearProgress'
 import Divider from '@mui/material/Divider'
 import Chip from '@mui/material/Chip'
+import IconButton from '@mui/material/IconButton'
+import Paper from '@mui/material/Paper'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import Switch from '@mui/material/Switch'
+import FormControlLabel from '@mui/material/FormControlLabel'
 
 // Form validation
 import * as yup from 'yup'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, useFieldArray } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { FeeService } from '@/store/slices/feesSlice'
-
-// Organization types
-const organizationTypes = ['Government', 'Private', 'NGO', 'International']
+import { nigerianStates, paymentSupportOptions, organizationTypes, serviceTypes } from '@/libs/constant'
 
 interface OrganizationFormProps {
   isEdit?: boolean
@@ -47,15 +59,38 @@ interface OrganizationFormProps {
   organizationId?: string
 }
 
-// Validation schema
+// Service validation schema
+const serviceSchema = yup.object().shape({
+  name: yup.string().required('Service name is required'),
+  type: yup.string().required('Service type is required'),
+  state: yup.string().required('State is required'),
+  amount: yup
+    .number()
+    .typeError('Amount must be a number')
+    .required('Amount is required')
+    .positive('Amount must be positive'),
+  description: yup.string().nullable(),
+  status: yup.boolean().default(true),
+  metadata: yup
+    .object()
+    .shape({
+      payment_type: yup.string().nullable(),
+      payment_support: yup.array().of(yup.string()).nullable()
+    })
+    .nullable()
+    .default({})
+})
+
+// Organization validation schema
 const schema = yup.object().shape({
   name: yup.string().required('Name is required'),
   type: yup.string().required('Type is required'),
-  description: yup.string().nullable(),
-  address: yup.string().nullable(),
-  contact_email: yup.string().email('Must be a valid email').nullable(),
-  contact_phone: yup.string().nullable(),
-  website: yup.string().url('Must be a valid URL').nullable()
+
+  // Make services optional but validate when present
+  services: yup.array().of(serviceSchema).optional().default([]),
+
+  // Add a temporary service field for the add service dialog
+  tempService: serviceSchema.nullable().default(null)
 })
 
 type FormData = yup.InferType<typeof schema>
@@ -71,23 +106,31 @@ const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }:
     severity: 'success'
   })
 
+  const [serviceDialogOpen, setServiceDialogOpen] = useState(false)
+  const [currentServiceIndex, setCurrentServiceIndex] = useState<number | null>(null)
+
   // Handle form validation
   const {
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors }
-  } = useForm<FormData>({
-    resolver: yupResolver<FormData, any, any>(schema),
+  } = useForm<FormData & { tempService?: any }>({
+    resolver: yupResolver(schema),
     defaultValues: {
       name: '',
       type: '',
-      description: '',
-      address: '',
-      contact_email: '',
-      contact_phone: '',
-      website: ''
+      services: [],
+      tempService: null // Add this
     }
+  })
+
+  // Field array for services
+  const { fields, append, remove, update } = useFieldArray({
+    control,
+    name: 'services'
   })
 
   // Fetch organization data if editing or previewing
@@ -107,72 +150,159 @@ const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }:
     if ((isEdit || isPreview) && currentOrganization) {
       reset({
         name: currentOrganization.name || '',
-        type: currentOrganization.type || ''
-        // description: currentOrganization.description || '',
-        // address: currentOrganization.address || '',
-        // contact_email: currentOrganization.contact_email || '',
-        // contact_phone: currentOrganization.contact_phone || '',
-        // website: currentOrganization.website || ''
+        type: currentOrganization.type || '',
+        services: currentOrganization.services?.map(service => ({
+          name: service.name || '',
+          type: service.type || '',
+          state: service.state || '',
+          amount: typeof service.amount === 'string' ? Number(service.amount) : service.amount || 0,
+          description: service.description || '',
+          status: Boolean(service.status !== undefined ? service.status : true),
+          metadata: service.metadata || { payment_type: '', payment_support: [] }
+        })) || [
+          {
+            name: '',
+            type: '',
+            state: '',
+            amount: 0,
+            description: '',
+            status: true,
+            metadata: {
+              payment_type: '',
+              payment_support: []
+            }
+          }
+        ]
       })
     }
   }, [currentOrganization, isEdit, isPreview, reset])
 
+  // Watch services to validate
+  const services = watch('services')
+
   // Handle form submission
-  const onSubmit = async (data: FormData) => {
-    try {
-      // Prepare data for API
-      const organizationData = {
-        name: data.name,
-        type: data.type,
-        services: [] as Partial<FeeService>[]
-        // description: data.description || '',
-        // address: data.address || '',
-        // contact_email: data.contact_email || '',
-        // contact_phone: data.contact_phone || '',
-        // website: data.website || ''
-      }
+  const onSubmit = useCallback(
+    async (data: FormData) => {
+      try {
+        // Prepare data for API
+        const organizationData = {
+          name: data.name,
+          type: data.type,
 
-      let result
+          services: data.services?.map((service, index) => ({
+            id: currentOrganization?.services?.[index]?.id,
+            name: service.name,
+            type: service.type,
+            state: service.state,
+            amount: Number(service.amount),
+            description: service.description || '',
+            status: service.status,
+            created_at: currentOrganization?.services?.[index]?.created_at,
+            updated_at: currentOrganization?.services?.[index]?.updated_at,
+            services: currentOrganization?.services?.[index]?.services || [],
+            metadata: {
+              payment_type: service.metadata?.payment_type || '',
+              payment_support: service.metadata?.payment_support || []
+            }
+          })) as unknown as Partial<FeeService>[]
+        }
 
-      if (isEdit && organizationId) {
-        // Update existing organization
-        result = await dispatch(updateOrganization({ id: organizationId, data: organizationData }))
-      } else {
-        // Create new organization
-        result = await dispatch(createOrganization(organizationData))
-      }
+        let result: any
 
-      if (createOrganization.fulfilled.match(result) || updateOrganization.fulfilled.match(result)) {
+        if (isEdit && organizationId) {
+          // Update existing organization
+          result = await dispatch(
+            updateOrganization({ id: organizationId, data: organizationData as Partial<Organization> })
+          )
+        } else {
+          result = await dispatch(createOrganization(organizationData))
+        }
+
+        if (createOrganization.fulfilled.match(result) || updateOrganization.fulfilled.match(result)) {
+          setSnackbar({
+            open: true,
+            message: `Organization ${isEdit ? 'updated' : 'created'} successfully`,
+            severity: 'success'
+          })
+
+          // Navigate back to organizations list after short delay
+          setTimeout(() => {
+            router.push('/organizations')
+          }, 1500)
+        } else {
+          setSnackbar({
+            open: true,
+            message: (result?.payload as string) || `Failed to ${isEdit ? 'update' : 'create'} organization`,
+            severity: 'error'
+          })
+        }
+      } catch (err: any) {
         setSnackbar({
           open: true,
-          message: `Organization ${isEdit ? 'updated' : 'created'} successfully`,
-          severity: 'success'
-        })
-
-        // Navigate back to organizations list after short delay
-        setTimeout(() => {
-          router.push('/organizations')
-        }, 1500)
-      } else {
-        setSnackbar({
-          open: true,
-          message: (result.payload as string) || `Failed to ${isEdit ? 'update' : 'create'} organization`,
+          message: err.message || `An error occurred`,
           severity: 'error'
         })
       }
-    } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.message || `An error occurred`,
-        severity: 'error'
-      })
-    }
-  }
+    },
+    [dispatch, isEdit, organizationId, router]
+  )
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false })
   }
 
+  const handleServiceDialogOpen = useCallback(
+    (index?: number) => {
+      if (index !== undefined) {
+        // Editing existing service
+        setCurrentServiceIndex(index)
+      } else {
+        // Adding new service - prepare empty data but don't add to array yet
+        setCurrentServiceIndex(null)
+
+        // Just set temporary data for the form, don't update the fields array yet
+        setValue('tempService', {
+          name: '',
+          type: '',
+          state: '',
+          amount: 0,
+          description: '',
+          status: true,
+          metadata: {
+            payment_type: '',
+            payment_support: []
+          }
+        })
+      }
+      setServiceDialogOpen(true)
+    },
+    [setValue]
+  )
+
+  const handleServiceDialogClose = useCallback(() => {
+    setServiceDialogOpen(false)
+    setCurrentServiceIndex(null)
+  }, [])
+
+  // Handle service save
+  const handleServiceSave = useCallback(() => {
+    const serviceData =
+      currentServiceIndex !== null
+        ? watch(`services.${currentServiceIndex}`)
+        : watch(`services.${services?.length || 0}`)
+
+    if (currentServiceIndex !== null) {
+      // Update existing service
+      update(currentServiceIndex, serviceData)
+    } else {
+      const newServiceData = watch('tempService')
+      if (newServiceData) {
+        append(newServiceData)
+      }
+    }
+
+    handleServiceDialogClose()
+  }, [currentServiceIndex, services, append, update, watch])
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -241,107 +371,85 @@ const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }:
                     />
                   </Grid>
 
+                  {/* Services Section */}
                   <Grid item xs={12}>
                     <Divider>
-                      <Chip label='Contact Information' color='primary' />
+                      <Chip label='Services' color='primary' />
                     </Divider>
                   </Grid>
 
-                  {/* Email */}
-                  <Grid item xs={12} md={6}>
-                    <Controller
-                      name='contact_email'
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          fullWidth
-                          label='Contact Email'
-                          placeholder='contact@organization.com'
-                          error={Boolean(errors.contact_email)}
-                          helperText={errors.contact_email?.message}
-                          disabled={isPreview}
-                        />
-                      )}
-                    />
-                  </Grid>
-
-                  {/* Phone */}
-                  <Grid item xs={12} md={6}>
-                    <Controller
-                      name='contact_phone'
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          fullWidth
-                          label='Contact Phone'
-                          placeholder='+234 000 0000 000'
-                          error={Boolean(errors.contact_phone)}
-                          helperText={errors.contact_phone?.message}
-                          disabled={isPreview}
-                        />
-                      )}
-                    />
-                  </Grid>
-
-                  {/* Website */}
-                  <Grid item xs={12} md={6}>
-                    <Controller
-                      name='website'
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          fullWidth
-                          label='Website'
-                          placeholder='https://www.organization.gov.ng'
-                          error={Boolean(errors.website)}
-                          helperText={errors.website?.message}
-                          disabled={isPreview}
-                        />
-                      )}
-                    />
-                  </Grid>
-
-                  {/* Address */}
-                  <Grid item xs={12} md={6}>
-                    <Controller
-                      name='address'
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          fullWidth
-                          label='Address'
-                          placeholder='Organization address'
-                          error={Boolean(errors.address)}
-                          helperText={errors.address?.message}
-                          disabled={isPreview}
-                        />
-                      )}
-                    />
-                  </Grid>
-
-                  {/* Description */}
                   <Grid item xs={12}>
-                    <Controller
-                      name='description'
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          fullWidth
-                          multiline
-                          rows={4}
-                          label='Description'
-                          placeholder='Enter organization description'
-                          error={Boolean(errors.description)}
-                          helperText={errors.description?.message}
-                          disabled={isPreview}
-                        />
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Typography variant='subtitle1'>
+                        Organization Services
+                        {errors.services && (
+                          <Typography color='error' variant='caption' sx={{ ml: 2 }}>
+                            {errors.services?.message}
+                          </Typography>
+                        )}
+                      </Typography>
+                      {!isPreview && (
+                        <Button
+                          variant='contained'
+                          startIcon={<i className='ri ri-add' />}
+                          onClick={() => {
+                            handleServiceDialogOpen()
+                          }}
+                        >
+                          Add Service
+                        </Button>
                       )}
-                    />
+                    </Box>
+
+                    {fields.length > 0 ? (
+                      <TableContainer component={Paper}>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Name</TableCell>
+                              <TableCell>Type</TableCell>
+                              <TableCell>State</TableCell>
+                              <TableCell>Amount</TableCell>
+                              <TableCell>Status</TableCell>
+                              {!isPreview && <TableCell align='right'>Actions</TableCell>}
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {fields.map((service, index) => (
+                              <TableRow key={service.id}>
+                                <TableCell>{watch(`services.${index}.name`)}</TableCell>
+                                <TableCell>{watch(`services.${index}.type`)}</TableCell>
+                                <TableCell>{watch(`services.${index}.state`)}</TableCell>
+                                <TableCell>₦{Number(watch(`services.${index}.amount`)).toLocaleString()}</TableCell>
+                                <TableCell>
+                                  <Chip
+                                    label={watch(`services.${index}.status`) ? 'Active' : 'Inactive'}
+                                    color={watch(`services.${index}.status`) ? 'success' : 'default'}
+                                    size='small'
+                                  />
+                                </TableCell>
+                                {!isPreview && (
+                                  <TableCell align='right'>
+                                    <IconButton size='small' onClick={() => handleServiceDialogOpen(index)}>
+                                      <Chip label='Edit' color='info' size='small' />
+                                    </IconButton>
+                                    <IconButton
+                                      size='small'
+                                      onClick={() => remove(index)}
+                                      disabled={fields.length <= 1}
+                                    >
+                                      <i className='ri ri-delete-bin-5-line' />
+                                    </IconButton>
+                                  </TableCell>
+                                )}
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    ) : (
+                      <Alert severity='info'>No services added yet. Please add at least one service.</Alert>
+                    )}
                   </Grid>
 
                   {/* Form Buttons */}
@@ -375,6 +483,207 @@ const OrganizationForm = ({ isEdit = false, isPreview = false, organizationId }:
           </CardContent>
         </Card>
       </Grid>
+
+      {/* Service Dialog */}
+      <Dialog open={serviceDialogOpen} onClose={handleServiceDialogClose} maxWidth='md' fullWidth>
+        <DialogTitle>{currentServiceIndex !== null ? 'Edit Service' : 'Add New Service'}</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3} sx={{ mt: 0 }}>
+            {/* Service Name */}
+            <Grid item xs={12} md={6}>
+              <Controller
+                name={currentServiceIndex !== null ? `services.${currentServiceIndex}.name` : 'tempService.name'}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label='Service Name'
+                    placeholder='e.g. Business Registration'
+                    error={Boolean(
+                      currentServiceIndex !== null
+                        ? errors?.services?.[currentServiceIndex]?.name
+                        : (errors?.tempService as any)?.name
+                    )}
+                    helperText={
+                      currentServiceIndex !== null
+                        ? errors?.services?.[currentServiceIndex]?.name?.message
+                        : (errors?.tempService as any)?.name?.message
+                    }
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Service Type */}
+            <Grid item xs={12} md={6}>
+              <Controller
+                name={currentServiceIndex !== null ? `services.${currentServiceIndex}.type` : 'tempService.type'}
+                control={control}
+                render={({ field }) => (
+                  <FormControl
+                    fullWidth
+                    error={Boolean(
+                      currentServiceIndex !== null
+                        ? errors?.services?.[currentServiceIndex]?.type
+                        : errors?.tempService?.type
+                    )}
+                  >
+                    <InputLabel>Service Type</InputLabel>
+                    <Select {...field} label='Service Type'>
+                      {serviceTypes.map(type => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {(currentServiceIndex !== null
+                      ? errors?.services?.[currentServiceIndex]?.type
+                      : errors?.tempService?.type) && (
+                      <FormHelperText>
+                        {currentServiceIndex !== null
+                          ? (errors?.services?.[currentServiceIndex]?.type as { message?: string })?.message
+                          : (errors?.tempService?.type as { message?: string })?.message}
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                )}
+              />
+            </Grid>
+
+            {/* State */}
+            <Grid item xs={12} md={6}>
+              <Controller
+                name={currentServiceIndex !== null ? `services.${currentServiceIndex}.state` : 'tempService.state'}
+                control={control}
+                render={({ field }) => (
+                  <FormControl
+                    fullWidth
+                    error={Boolean(
+                      currentServiceIndex !== null
+                        ? errors?.services?.[currentServiceIndex]?.state
+                        : (errors?.tempService as any)?.state
+                    )}
+                  >
+                    <InputLabel>State</InputLabel>
+                    <Select {...field} label='State'>
+                      {nigerianStates.map(state => (
+                        <MenuItem key={state} value={state}>
+                          {state}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {(currentServiceIndex !== null
+                      ? errors?.services?.[currentServiceIndex]?.state
+                      : (errors?.tempService as any)?.state) && (
+                      <FormHelperText>
+                        {currentServiceIndex !== null
+                          ? errors?.services?.[currentServiceIndex]?.state?.message
+                          : (errors?.tempService as any)?.state?.message}
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                )}
+              />
+            </Grid>
+
+            {/* Amount */}
+            <Grid item xs={12} md={6}>
+              <Controller
+                name={currentServiceIndex !== null ? `services.${currentServiceIndex}.amount` : 'tempService.amount'}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    type='number'
+                    label='Amount (₦)'
+                    placeholder='5000'
+                    error={Boolean(
+                      currentServiceIndex !== null
+                        ? errors?.services?.[currentServiceIndex]?.amount
+                        : (errors?.tempService as any)?.amount
+                    )}
+                    helperText={
+                      currentServiceIndex !== null
+                        ? errors?.services?.[currentServiceIndex]?.amount?.message
+                        : (errors?.tempService as any)?.amount?.message
+                    }
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Status */}
+            <Grid item xs={12} md={6}>
+              <Controller
+                name={currentServiceIndex !== null ? `services.${currentServiceIndex}.status` : 'tempService.status'}
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={<Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} />}
+                    label={`Service Status: ${field.value ? 'Active' : 'Inactive'}`}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Payment Type */}
+            <Grid item xs={12} md={6}>
+              <Controller
+                name={
+                  currentServiceIndex !== null
+                    ? `services.${currentServiceIndex}.metadata.payment_type`
+                    : 'tempService.metadata.payment_type'
+                }
+                control={control}
+                render={({ field }) => (
+                  <FormControl fullWidth>
+                    <InputLabel>Payment Type</InputLabel>
+                    <Select {...field} label='Payment Type'>
+                      {paymentSupportOptions.map(type => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              />
+            </Grid>
+
+            {/* Description */}
+            <Grid item xs={12}>
+              <Controller
+                name={
+                  currentServiceIndex !== null
+                    ? `services.${currentServiceIndex}.description`
+                    : 'tempService.description'
+                }
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    multiline
+                    rows={3}
+                    label='Description'
+                    placeholder='Enter service description'
+                  />
+                )}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleServiceDialogClose} color='inherit'>
+            Cancel
+          </Button>
+          <Button onClick={handleServiceSave} variant='contained'>
+            Save Service
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Snackbar for notifications */}
       <Snackbar

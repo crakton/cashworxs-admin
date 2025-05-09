@@ -51,6 +51,7 @@ import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import InputAdornment from '@mui/material/InputAdornment'
 import Snackbar from '@mui/material/Snackbar'
+import { nigerianStates } from '@/libs/constant'
 
 interface OrganizationDetailProps {
   organizationId: string
@@ -60,7 +61,7 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { isLoading, error, currentOrganization, services } = useAppSelector(state => state.organizations)
-
+  console.log('services', services)
   const [servicesPage, setServicesPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(5)
 
@@ -114,11 +115,11 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
     setFormErrors({})
     setNewServiceItem({
       name: '',
-      type: 'Fee',
-      state: 'Active',
+      type: '',
+      state: '',
       amount: '',
       description: '',
-      status: true,
+      status: false,
       metadata: {
         payment_support: ['card', 'bank'],
         payment_type: 'onetime'
@@ -178,7 +179,6 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
       if (currentOrganization) {
         const serviceData: CreateServiceItemDTO = {
           ...(newServiceItem as CreateServiceItemDTO),
-          fee_id: currentOrganization.id,
           organization_id: currentOrganization.id,
           status: newServiceItem.status ? 1 : 0
         }
@@ -317,14 +317,6 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
                 >
                   Add Service Item
                 </Button>
-                <Button
-                  size='small'
-                  variant='outlined'
-                  onClick={() => router.push(`/services/create?org=${currentOrganization.id}`)}
-                  startIcon={<i className='ri-add-line' />}
-                >
-                  Add Service
-                </Button>
               </Box>
             }
           />
@@ -372,14 +364,14 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
                                 <IconButton
                                   size='small'
                                   color='info'
-                                  onClick={() => router.push(`/services/${service.id}`)}
+                                  onClick={() => router.push(`/services/fees/${service.id}`)}
                                 >
                                   <i className='ri-eye-line' />
                                 </IconButton>
                                 <IconButton
                                   size='small'
                                   color='primary'
-                                  onClick={() => router.push(`/services/edit/${service.id}`)}
+                                  onClick={() => router.push(`/services/fees/edit/${service.id}`)}
                                 >
                                   <i className='ri-edit-line' />
                                 </IconButton>
@@ -412,14 +404,6 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
                   sx={{ mt: 2, mr: 2 }}
                 >
                   Add First Service Item
-                </Button>
-                <Button
-                  variant='outlined'
-                  onClick={() => router.push(`/services/create?org=${currentOrganization.id}`)}
-                  startIcon={<i className='ri-add-line' />}
-                  sx={{ mt: 2 }}
-                >
-                  Add Service
                 </Button>
               </Box>
             )}
@@ -491,8 +475,11 @@ const OrganizationDetail = ({ organizationId }: OrganizationDetailProps) => {
                   label='State'
                   onChange={handleSelectChange}
                 >
-                  <MenuItem value='Active'>Active</MenuItem>
-                  <MenuItem value='Inactive'>Inactive</MenuItem>
+                  {nigerianStates.map(state => (
+                    <MenuItem key={state} value={state}>
+                      {state}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>

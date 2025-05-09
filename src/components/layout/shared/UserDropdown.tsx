@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 
 // Next Imports
@@ -22,7 +22,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Button from '@mui/material/Button'
 
 // Redux import
-import { logout } from '@/store/slices/authSlice'
+import { getUser, logout } from '@/store/slices/authSlice'
 
 // Hooks import
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
@@ -66,8 +66,12 @@ const UserDropdown = () => {
 
     setOpen(false)
   }
-
   const { user } = useAppSelector(state => state.auth)
+  useEffect(() => {
+    if (!user) {
+      dispatch(getUser())
+    }
+  }, [user])
 
   return (
     <>
@@ -80,7 +84,7 @@ const UserDropdown = () => {
       >
         <Avatar
           ref={anchorRef}
-          alt='John Doe'
+          alt={user?.full_name ?? 'John Doe'}
           src='/images/avatars/1.png'
           onClick={handleDropdownOpen}
           className='cursor-pointer bs-[38px] is-[38px]'
@@ -108,9 +112,9 @@ const UserDropdown = () => {
                     <Avatar alt='John Doe' src='/images/avatars/1.png' />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
-                        John Doe
+                        {user?.full_name ?? 'John Doe'}
                       </Typography>
-                      <Typography variant='caption'>Admin</Typography>
+                      <Typography variant='caption'>{user?.is_admin ? 'Admin' : 'IRS Manager'}</Typography>
                     </div>
                   </div>
                   <Divider className='mlb-1' />

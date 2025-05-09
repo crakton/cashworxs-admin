@@ -207,8 +207,12 @@ export const fetchOrganizationServices = createAsyncThunk(
         }
       })
 
+      console.log('Organization services response:', response.data)
+
       return { organizationId, data: response.data }
     } catch (error: any) {
+      console.log('Error fetching organization services:', error)
+
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch organization services')
     }
   }
@@ -392,7 +396,7 @@ const organizationsSlice = createSlice({
     })
     builder.addCase(fetchOrganizationServices.fulfilled, (state, action: PayloadAction<any>) => {
       state.isLoading = false
-      const orgServices = action.payload.data.services || []
+      const orgServices = action.payload.data.organization.services || []
 
       // Update the services list
       state.services = orgServices

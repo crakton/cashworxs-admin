@@ -15,7 +15,7 @@ import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
+import Select, { SelectChangeEvent } from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormHelperText from '@mui/material/FormHelperText'
 import Box from '@mui/material/Box'
@@ -28,6 +28,7 @@ import Paper from '@mui/material/Paper'
 // Redux Imports
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
 import { createServiceFee, fetchOrganizations } from '@/store/slices/feesSlice'
+import { nigerianStates } from '@/libs/constant'
 
 const CreateFeeServicePage = () => {
   const router = useRouter()
@@ -36,22 +37,22 @@ const CreateFeeServicePage = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    type: 'standard',
-    state: 'active',
+    type: '',
+    state: '',
     amount: '',
     description: '',
     status: 1,
-    organization_id: '', // Added organization_id field
+    organization_id: '',
     metadata: {
-      payment_type: 'one_time',
-      payment_support: ['card', 'bank']
+      payment_type: '',
+      payment_support: []
     }
   })
 
   const [formErrors, setFormErrors] = useState({
     name: '',
     amount: '',
-    organization_id: '' // Added organization_id validation
+    organization_id: ''
   })
 
   const [successMessage, setSuccessMessage] = useState('')
@@ -61,7 +62,7 @@ const CreateFeeServicePage = () => {
     dispatch(fetchOrganizations())
   }, [dispatch])
 
-  const handleInputChange = e => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
@@ -69,7 +70,22 @@ const CreateFeeServicePage = () => {
     }))
 
     // Clear validation error when user types
-    if (formErrors[name]) {
+    if (name in formErrors) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }))
+    }
+  }
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+
+    // Clear validation error when user types
+    if (name in formErrors) {
       setFormErrors(prev => ({
         ...prev,
         [name]: ''
@@ -77,14 +93,14 @@ const CreateFeeServicePage = () => {
     }
   }
 
-  const handleStatusChange = e => {
+  const handleStatusChange = (e: SelectChangeEvent<string>) => {
     setFormData(prev => ({
       ...prev,
       status: e.target.value === 'active' ? 1 : 0
     }))
   }
 
-  const handleMetadataChange = e => {
+  const handleMetadataChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
@@ -122,7 +138,7 @@ const CreateFeeServicePage = () => {
     return isValid
   }
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault()
 
     if (!validateForm()) {
@@ -142,15 +158,15 @@ const CreateFeeServicePage = () => {
       // Reset form after successful creation
       setFormData({
         name: '',
-        type: 'standard',
-        state: 'active',
+        type: '',
+        state: '',
         amount: '',
         description: '',
         status: 1,
         organization_id: '',
         metadata: {
-          payment_type: 'one_time',
-          payment_support: ['card', 'bank']
+          payment_type: '',
+          payment_support: []
         }
       })
 
@@ -221,7 +237,7 @@ const CreateFeeServicePage = () => {
                       labelId='organization-label'
                       name='organization_id'
                       value={formData.organization_id}
-                      onChange={handleInputChange}
+                      onChange={handleSelectChange}
                       label='Organization'
                       disabled={isLoading}
                     >
@@ -244,7 +260,7 @@ const CreateFeeServicePage = () => {
                       labelId='fee-type-label'
                       name='type'
                       value={formData.type}
-                      onChange={handleInputChange}
+                      onChange={handleSelectChange}
                       label='Fee Type'
                       disabled={isLoading}
                     >
@@ -280,16 +296,15 @@ const CreateFeeServicePage = () => {
                       labelId='fee-state-label'
                       name='state'
                       value={formData.state}
-                      onChange={handleInputChange}
+                      onChange={handleSelectChange}
                       label='State'
                       disabled={isLoading}
                     >
-                      <MenuItem value='active'>Active</MenuItem>
-                      <MenuItem value='inactive'>Inactive</MenuItem>
-                      <MenuItem value='pending'>Pending</MenuItem>
-                      <MenuItem value='federal'>Federal</MenuItem>
-                      <MenuItem value='lagos'>Lagos</MenuItem>
-                      <MenuItem value='nationwide'>Nationwide</MenuItem>
+                      {nigerianStates.map(state => (
+                        <MenuItem key={state} value={state}>
+                          {state}
+                        </MenuItem>
+                      ))}
                     </Select>
                     <FormHelperText>Current state of this fee service</FormHelperText>
                   </FormControl>

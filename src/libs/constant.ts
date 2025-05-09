@@ -62,3 +62,18 @@ export const taxTypes = [
   'Withholding Tax',
   'Other'
 ]
+
+// Service types
+export const serviceTypes = [
+  'Administrative',
+  'Registration',
+  'License',
+  'Permit',
+  'Certificate',
+  'Tax',
+  'Fee',
+  'Other'
+]
+
+// Organization types
+export const organizationTypes = ['Government', 'Private', 'NGO', 'International']

@@ -80,7 +80,7 @@ const Login = ({ mode }: { mode: Mode }) => {
 
     try {
       const resultAction = await dispatch(login(formData))
-      if (login.fulfilled.match(resultAction)) {
+      if (login.fulfilled.match(resultAction) && resultAction.payload.user.is_admin) {
         router.push('/')
       }
     } catch (error) {
