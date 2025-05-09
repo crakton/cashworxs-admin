@@ -1,24 +1,24 @@
 // Next Imports
-import Link from 'next/link'
-import Image from 'next/image'
+import Link from 'next/link';
+import Image from 'next/image';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Grid from '@mui/material/Grid'
-import Typography from '@mui/material/Typography'
-import Switch from '@mui/material/Switch'
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import Switch from '@mui/material/Switch';
 
 // Component Imports
-import CustomIconButton from '@core/components/mui/IconButton'
+import CustomIconButton from '@core/components/mui/IconButton';
 
 type ConnectedAccountsType = {
   title: string
   logo: string
   checked: boolean
   subtitle: string
-}
+};
 
 type SocialAccountsType = {
   title: string
@@ -26,7 +26,7 @@ type SocialAccountsType = {
   username?: string
   isConnected: boolean
   href?: string
-}
+};
 
 // Vars
 const connectedAccountsArr: ConnectedAccountsType[] = [
@@ -60,7 +60,7 @@ const connectedAccountsArr: ConnectedAccountsType[] = [
     subtitle: 'Task Communication',
     logo: '/images/logos/asana.png'
   }
-]
+];
 
 const socialAccountsArr: SocialAccountsType[] = [
   {
@@ -92,7 +92,7 @@ const socialAccountsArr: SocialAccountsType[] = [
     isConnected: false,
     logo: '/images/logos/behance.png'
   }
-]
+];
 
 const Connections = () => {
   return (
@@ -149,7 +149,7 @@ const Connections = () => {
         </Grid>
       </Grid>
     </Card>
-  )
-}
+  );
+};
 
-export default Connections
+export default Connections;

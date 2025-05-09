@@ -1,47 +1,47 @@
-'use client'
+'use client';
 
 // React Imports
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
 // Next Imports
-import Image from 'next/image'
+import Image from 'next/image';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import LinearProgress from '@mui/material/LinearProgress'
-import Alert from '@mui/material/Alert'
-import Box from '@mui/material/Box'
-import Accordion from '@mui/material/Accordion'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import Chip from '@mui/material/Chip'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import TextField from '@mui/material/TextField'
-import IconButton from '@mui/material/IconButton'
-import Divider from '@mui/material/Divider'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import LinearProgress from '@mui/material/LinearProgress';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Chip from '@mui/material/Chip';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import Divider from '@mui/material/Divider';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 // Icons
-import ChevronDown from '@/assets/svg/icons/chevron-down.svg'
-import PlusIcon from '@/assets/svg/icons/plus.svg'
-import EditIcon from '@/assets/svg/icons/pencil-outline.svg'
-import DeleteIcon from '@/assets/svg/icons/delete-outline.svg'
-import AddCircleOutlineIcon from '@/assets/svg/icons/plus-circle-outline.svg'
-import RemoveCircleOutlineIcon from '@/assets/svg/icons/minus-circle-outline.svg'
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux'
-import type { Activity } from '@/store/slices/activitiesSlice'
-import { createActivity, deleteActivity, fetchActivities, updateActivity } from '@/store/slices/activitiesSlice'
+import ChevronDown from '@/assets/svg/icons/chevron-down.svg';
+import PlusIcon from '@/assets/svg/icons/plus.svg';
+import EditIcon from '@/assets/svg/icons/pencil-outline.svg';
+import DeleteIcon from '@/assets/svg/icons/delete-outline.svg';
+import AddCircleOutlineIcon from '@/assets/svg/icons/plus-circle-outline.svg';
+import RemoveCircleOutlineIcon from '@/assets/svg/icons/minus-circle-outline.svg';
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import type { Activity } from '@/store/slices/activitiesSlice';
+import { createActivity, deleteActivity, fetchActivities, updateActivity } from '@/store/slices/activitiesSlice';
 
 // Redux Imports
 
@@ -57,7 +57,7 @@ const defaultActivity: Activity = {
   description: '',
   title: '',
   meta_info: [{ name: '', description: '' }]
-}
+};
 
 // Confirmation dialog interface
 interface ConfirmDialog {
@@ -69,8 +69,8 @@ interface ConfirmDialog {
 
 const UserActivities = () => {
   // Hooks
-  const dispatch = useAppDispatch()
-  const { activities, isLoading, error } = useAppSelector(state => state.activities)
+  const dispatch = useAppDispatch();
+  const { activities, isLoading, error } = useAppSelector(state => state.activities);
 
   // State
   const [activityDialog, setActivityDialog] = useState<{
@@ -81,21 +81,21 @@ const UserActivities = () => {
     open: false,
     mode: 'add',
     data: { ...defaultActivity }
-  })
+  });
 
-  const [expandedPanel, setExpandedPanel] = useState<number | false>(false)
+  const [expandedPanel, setExpandedPanel] = useState<number | false>(false);
 
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog>({
     open: false,
     title: '',
     message: '',
     id: null
-  })
+  });
 
   // Effects
   useEffect(() => {
-    dispatch(fetchActivities())
-  }, [dispatch])
+    dispatch(fetchActivities());
+  }, [dispatch]);
 
   // Handlers
   const handleOpenAddDialog = () => {
@@ -103,30 +103,30 @@ const UserActivities = () => {
       open: true,
       mode: 'add',
       data: { ...defaultActivity, id: Date.now() } // Temporary ID
-    })
-  }
+    });
+  };
 
   const handleOpenEditDialog = (activity: Activity) => {
     setActivityDialog({
       open: true,
       mode: 'edit',
       data: { ...activity }
-    })
-  }
+    });
+  };
 
   const handleCloseDialog = () => {
     setActivityDialog({
       ...activityDialog,
       open: false
-    })
-  }
+    });
+  };
 
   const handleAccordionChange = (panel: number) => (event: React.SyntheticEvent, isExpanded: boolean) => {
-    setExpandedPanel(isExpanded ? panel : false)
-  }
+    setExpandedPanel(isExpanded ? panel : false);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
 
     if (name) {
       setActivityDialog({
@@ -135,11 +135,11 @@ const UserActivities = () => {
           ...activityDialog.data,
           [name]: value
         }
-      })
+      });
     }
-  }
+  };
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
 
     if (name) {
       setActivityDialog({
@@ -148,17 +148,17 @@ const UserActivities = () => {
           ...activityDialog.data,
           [name]: value
         }
-      })
+      });
     }
-  }
+  };
 
   const handleMetaInfoChange = (index: number, field: keyof MetaInfo, value: string) => {
-    const newMetaInfo = [...activityDialog.data.meta_info]
+    const newMetaInfo = [...activityDialog.data.meta_info];
 
     newMetaInfo[index] = {
       ...newMetaInfo[index],
       [field]: value
-    }
+    };
 
     setActivityDialog({
       ...activityDialog,
@@ -166,8 +166,8 @@ const UserActivities = () => {
         ...activityDialog.data,
         meta_info: newMetaInfo
       }
-    })
-  }
+    });
+  };
 
   const handleAddMetaInfo = () => {
     setActivityDialog({
@@ -176,17 +176,17 @@ const UserActivities = () => {
         ...activityDialog.data,
         meta_info: [...activityDialog.data.meta_info, { name: '', description: '' }]
       }
-    })
-  }
+    });
+  };
 
   const handleRemoveMetaInfo = (index: number) => {
     if (activityDialog.data.meta_info.length === 1) {
-      return // Don't remove the last item
+      return; // Don't remove the last item
     }
 
-    const newMetaInfo = [...activityDialog.data.meta_info]
+    const newMetaInfo = [...activityDialog.data.meta_info];
 
-    newMetaInfo.splice(index, 1)
+    newMetaInfo.splice(index, 1);
 
     setActivityDialog({
       ...activityDialog,
@@ -194,18 +194,18 @@ const UserActivities = () => {
         ...activityDialog.data,
         meta_info: newMetaInfo
       }
-    })
-  }
+    });
+  };
 
   const handleSaveActivity = () => {
     if (activityDialog.mode === 'add') {
-      dispatch(createActivity(activityDialog.data))
+      dispatch(createActivity(activityDialog.data));
     } else {
-      dispatch(updateActivity(activityDialog.data))
+      dispatch(updateActivity(activityDialog.data));
     }
 
-    handleCloseDialog()
-  }
+    handleCloseDialog();
+  };
 
   const openDeleteConfirmDialog = (id: number) => {
     setConfirmDialog({
@@ -213,29 +213,29 @@ const UserActivities = () => {
       title: 'Delete Activity',
       message: 'Are you sure you want to delete this activity? This action cannot be undone.',
       id
-    })
-  }
+    });
+  };
 
   const handleDeleteActivity = () => {
     if (confirmDialog.id !== null) {
-      dispatch(deleteActivity(confirmDialog.id))
-      setConfirmDialog({ ...confirmDialog, open: false })
+      dispatch(deleteActivity(confirmDialog.id));
+      setConfirmDialog({ ...confirmDialog, open: false });
     }
-  }
+  };
 
   const handleCloseConfirmDialog = () => {
-    setConfirmDialog({ ...confirmDialog, open: false })
-  }
+    setConfirmDialog({ ...confirmDialog, open: false });
+  };
 
   // Validation
   const isFormValid = () => {
-    const { type, description, title, meta_info } = activityDialog.data
+    const { type, description, title, meta_info } = activityDialog.data;
 
-    if (!type || !description || !title) return false
+    if (!type || !description || !title) return false;
 
     // Check if all meta_info fields are filled
-    return meta_info.every(item => item.name && item.description)
-  }
+    return meta_info.every(item => item.name && item.description);
+  };
 
   return (
     <Grid container spacing={6}>
@@ -297,8 +297,8 @@ const UserActivities = () => {
                     <IconButton
                       size='small'
                       onClick={e => {
-                        e.stopPropagation()
-                        handleOpenEditDialog(activity)
+                        e.stopPropagation();
+                        handleOpenEditDialog(activity);
                       }}
                     >
                       <i className='ri ri-pencil-line'></i>
@@ -307,8 +307,8 @@ const UserActivities = () => {
                       size='small'
                       color='error'
                       onClick={e => {
-                        e.stopPropagation()
-                        openDeleteConfirmDialog(activity.id)
+                        e.stopPropagation();
+                        openDeleteConfirmDialog(activity.id);
                       }}
                     >
                       <i className='ri ri-delete-bin-line'></i>
@@ -453,7 +453,7 @@ const UserActivities = () => {
         </DialogActions>
       </Dialog>
     </Grid>
-  )
-}
+  );
+};
 
-export default UserActivities
+export default UserActivities;

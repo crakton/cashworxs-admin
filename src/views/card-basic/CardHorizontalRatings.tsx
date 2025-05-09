@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
 // Next Imports
-import Image from 'next/image'
+import Image from 'next/image';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Rating from '@mui/material/Rating'
-import CardActions from '@mui/material/CardActions'
-import Button from '@mui/material/Button'
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import Rating from '@mui/material/Rating';
+import CardActions from '@mui/material/CardActions';
+import Button from '@mui/material/Button';
 
 const CardHorizontalRatings = () => {
   return (
@@ -42,7 +42,7 @@ const CardHorizontalRatings = () => {
         </Grid>
       </Grid>
     </Card>
-  )
-}
+  );
+};
 
-export default CardHorizontalRatings
+export default CardHorizontalRatings;

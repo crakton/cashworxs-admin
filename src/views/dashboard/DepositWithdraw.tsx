@@ -1,22 +1,22 @@
 // Next Imports
-import Image from 'next/image'
+import Image from 'next/image';
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Grid from '@mui/material/Grid'
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
 
 // Component Imports
-import Link from '@components/Link'
+import Link from '@components/Link';
 
 type DataType = {
   logo: string
   title: string
   amount: string
   subtitle: string
-}
+};
 
 // Vars
 const depositData: DataType[] = [
@@ -50,7 +50,7 @@ const depositData: DataType[] = [
     subtitle: 'Wallet deposit',
     logo: '/images/logos/citi-bank.png'
   }
-]
+];
 
 const withdrawData = [
   {
@@ -83,7 +83,7 @@ const withdrawData = [
     logo: '/images/logos/aws.png',
     subtitle: 'Choosing a Cloud Platform'
   }
-]
+];
 
 const DepositWithdraw = () => {
   return (
@@ -147,7 +147,7 @@ const DepositWithdraw = () => {
         </Grid>
       </Grid>
     </Card>
-  )
-}
+  );
+};
 
-export default DepositWithdraw
+export default DepositWithdraw;
