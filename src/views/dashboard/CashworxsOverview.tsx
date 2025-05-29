@@ -5,9 +5,11 @@ import type { FC } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 
-const CashworxsOverview: FC<{ totalUsers: number; totalFees: number }> = ({ totalUsers, totalFees }) => {
+const CashworxsOverview: FC<{ totalUsers: number; total_transactions: number }> = ({
+	totalUsers,
+	total_transactions
+}) => {
 	return (
 		<Card>
 			<CardContent className='flex flex-col gap-2 relative items-start'>
@@ -18,7 +20,7 @@ const CashworxsOverview: FC<{ totalUsers: number; totalFees: number }> = ({ tota
 					<Typography variant='h4' color='primary'>
 						{totalUsers} Users
 					</Typography>
-					<Typography>{totalFees} Total Transactions 💰</Typography>
+					<Typography>💰 Total Transactions: {total_transactions}</Typography>
 				</div>
 			</CardContent>
 		</Card>

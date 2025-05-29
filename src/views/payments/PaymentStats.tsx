@@ -59,20 +59,20 @@ const PaymentStats: FC<PaymentStatsProps> = ({ payments }) => {
   // }, [payments])
 
   // Get color for payment method
-  const getMethodColor = (method: string) => {
-    switch (method.toLowerCase()) {
-      case 'credit card':
-        return theme.palette.primary.main;
-      case 'paypal':
-        return theme.palette.info.main;
-      case 'bank transfer':
-        return theme.palette.success.main;
-      case 'crypto':
-        return theme.palette.warning.main;
-      default:
-        return theme.palette.secondary.main;
-    }
-  };
+  // const getMethodColor = (method: string) => {
+  //   switch (method.toLowerCase()) {
+  //     case 'credit card':
+  //       return theme.palette.primary.main;
+  //     case 'paypal':
+  //       return theme.palette.info.main;
+  //     case 'bank transfer':
+  //       return theme.palette.success.main;
+  //     case 'crypto':
+  //       return theme.palette.warning.main;
+  //     default:
+  //       return theme.palette.secondary.main;
+  //   }
+  // };
 
   return (
     <Card>

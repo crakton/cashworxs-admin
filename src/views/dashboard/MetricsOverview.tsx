@@ -54,7 +54,7 @@ const MetricsOverview = ({ dashboardData }: { dashboardData: DashboardStats }) =
 		<Card className='bs-full'>
 			<CardHeader
 				title='Platform Metrics'
-				action={<OptionMenu iconClassName='text-textPrimary' options={['Refresh', 'Export', 'Details']} />}
+				action={<OptionMenu iconClassName='text-textPrimary' options={['Refresh', 'Export']} />}
 				subheader={
 					<p className='mbs-3'>
 						<span className='font-medium text-textPrimary'>System Overview</span>
@@ -80,15 +80,15 @@ const MetricsOverview = ({ dashboardData }: { dashboardData: DashboardStats }) =
 										</div>
 									</AccordionSummary>
 									<AccordionDetails>
-										{item.title === 'Fees' ? (
+										{item.title.toLocaleLowerCase().includes('fee') ? (
 											<div className='flex flex-col gap-2'>
-												<Typography variant='subtitle1'>Services Breakdown</Typography>
+												<Typography variant='subtitle1'>Breakdown</Typography>
 												<Typography>Businesses: {dashboardData?.service_fees_business || 0}</Typography>
 												<Typography>Government: {dashboardData?.service_fees_government || 0}</Typography>
 											</div>
 										) : (
 											<div className='flex flex-col gap-2'>
-												<Typography variant='subtitle1'>Services Breakdown</Typography>
+												<Typography variant='subtitle1'> Breakdown</Typography>
 												<Typography>Private Sector: {dashboardData?.service_taxes_private || 0}</Typography>
 												<Typography>Governmental: {dashboardData?.service_taxes_governmental || 0}</Typography>
 											</div>

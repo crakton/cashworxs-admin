@@ -1,385 +1,324 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
 import Cookies from 'js-cookie';
+import {
+	Card,
+	CardHeader,
+	CardContent,
+	Grid,
+	TextField,
+	Button,
+	Typography,
+	Alert,
+	CircularProgress,
+	Box,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	Paper,
+	IconButton,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle
+} from '@mui/material';
 
-// MUI Components
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardContent from '@mui/material/CardContent';
-import Grid from '@mui/material/Grid';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Alert from '@mui/material/Alert';
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import IconButton from '@mui/material/IconButton';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-
-// Redux actions
 import axios from 'axios';
-
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
 import { fetchOnboardingData, updateOnboardingItem, addOnboardingItem } from '@/store/slices/onboardingSlice';
 
 interface OnboardingItem {
-  id?: string
-  title: string
-  description: string
-  image_url: string
+	id?: string;
+	title: string;
+	description: string;
+	image_url: string;
 }
 
 const OnboardingAdmin = () => {
-  const dispatch = useAppDispatch();
-  const { onboardingData, isLoading, error } = useAppSelector(state => state.onboarding);
+	const dispatch = useAppDispatch();
+	const { onboardingData, isLoading, error } = useAppSelector(state => state.onboarding);
 
-  const [items, setItems] = useState<OnboardingItem[]>([]);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [previewDialog, setPreviewDialog] = useState(false);
-  const [currentItem, setCurrentItem] = useState<OnboardingItem | null>(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
+	const [items, setItems] = useState<OnboardingItem[]>([]);
+	const [itemIndex, setItemIndex] = useState<number>();
+	const [currentItem, setCurrentItem] = useState<OnboardingItem | null>(null);
+	const [openDialog, setOpenDialog] = useState(false);
+	const [previewDialog, setPreviewDialog] = useState(false);
+	const [uploadingImage, setUploadingImage] = useState(false);
+	const [isNewItem, setIsNewItem] = useState(false);
 
-  // For new items
-  const [isNewItem, setIsNewItem] = useState(false);
+	useEffect(() => {
+		dispatch(fetchOnboardingData());
+	}, [dispatch]);
 
-  useEffect(() => {
-    dispatch(fetchOnboardingData());
-  }, [dispatch]);
+	useEffect(() => {
+		if (Array.isArray(onboardingData)) {
+			setItems(onboardingData);
+		}
+	}, [onboardingData]);
 
-  useEffect(() => {
-    if (onboardingData && Array.isArray(onboardingData)) {
-      setItems(onboardingData);
-    }
-  }, [onboardingData]);
+	const openNewDialog = () => {
+		setCurrentItem({ title: '', description: '', image_url: '' });
+		setIsNewItem(true);
+		setOpenDialog(true);
+	};
 
-  const handleEditClick = (item: OnboardingItem) => {
-    setCurrentItem(item);
-    setIsNewItem(false);
-    setOpenDialog(true);
-  };
+	const openEditDialog = (item: OnboardingItem, index: number) => {
+		console.log('Edit index:', index);
+		setItemIndex(index);
+		setCurrentItem({ ...item });
+		setIsNewItem(false);
+		setOpenDialog(true);
+	};
 
-  const handlePreviewClick = (item: OnboardingItem) => {
-    setCurrentItem(item);
-    setPreviewDialog(true);
-  };
+	const openPreviewDialog = (item: OnboardingItem) => {
+		setCurrentItem(item);
+		setPreviewDialog(true);
+	};
 
-  const handleAddNewClick = () => {
-    setCurrentItem({
-      title: '',
-      description: '',
-      image_url: ''
-    });
-    setIsNewItem(true);
-    setOpenDialog(true);
-  };
+	const closeDialogs = () => {
+		setOpenDialog(false);
+		setPreviewDialog(false);
+		setCurrentItem(null);
+	};
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setPreviewDialog(false);
-    setCurrentItem(null);
-  };
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { name, value } = e.target;
+		console.log('Field Change:', name, value);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+		setCurrentItem(prev => (prev ? { ...prev, [name]: value } : prev));
+	};
 
-    console.log('Input changed:', name, value);
+	const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
 
-    if (currentItem) {
-      setCurrentItem({
-        ...currentItem,
-        [name]: value
-      });
-    }
-  };
+		setUploadingImage(true);
+		const token = Cookies.get('auth_token');
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+		try {
+			const formData = new FormData();
+			formData.append('image', file);
 
-    const file = e.target.files[0];
+			const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/upload-image`, formData, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+					Authorization: `Bearer ${token}`
+				}
+			});
 
-    setUploadingImage(true);
+			if (response.data?.url) {
+				setCurrentItem(prev => (prev ? { ...prev, image_url: response.data.url } : prev));
+				console.log('Image uploaded:', response.data.url);
+			} else {
+				console.warn('No image URL returned from upload.');
+			}
+		} catch (err) {
+			console.error('Image upload error:', err);
+		} finally {
+			setUploadingImage(false);
+		}
+	};
 
-    try {
-      const formData = new FormData();
+	const handleSaveItem = async () => {
+		if (!currentItem || itemIndex === undefined) {
+			console.warn('No item to save.');
+			return;
+		}
+		console.log('Saving item:', currentItem);
+		try {
+			if (isNewItem) {
+				await dispatch(addOnboardingItem(currentItem)).unwrap();
+				console.log('Item added successfully.');
+			} else if (currentItem.id) {
+				await dispatch(updateOnboardingItem({ index: itemIndex, data: currentItem })).unwrap();
+				console.log('Item updated successfully.');
+			}
 
-      formData.append('image', file);
+			closeDialogs();
+			dispatch(fetchOnboardingData());
+		} catch (error) {
+			console.error('Save failed:', error);
+		}
+	};
 
-      // Replace with your actual upload endpoint
-      const token = Cookies.get('auth_token');
+	if (isLoading && !items.length) {
+		return (
+			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+				<CircularProgress />
+			</Box>
+		);
+	}
 
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/upload-image`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
-        }
-      });
+	return (
+		<Grid container spacing={6}>
+			<Grid item xs={12}>
+				{error && (
+					<Alert severity='error' sx={{ mb: 4 }}>
+						{error}
+					</Alert>
+				)}
 
-      if (currentItem && response.data.url) {
-        setCurrentItem({
-          ...currentItem,
-          image_url: response.data.url
-        });
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
+				<Card>
+					<CardHeader
+						title='Onboarding Content Management'
+						subheader='Manage onboarding content items shown to users'
+						action={
+							<Button variant='contained' onClick={openNewDialog}>
+								Add New Item
+							</Button>
+						}
+					/>
+					<CardContent>
+						<TableContainer component={Paper}>
+							<Table>
+								<TableHead>
+									<TableRow>
+										<TableCell>Title</TableCell>
+										<TableCell>Description</TableCell>
+										<TableCell>Image</TableCell>
+										<TableCell align='right'>Actions</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{items.map((item, i) => (
+										<TableRow key={item.id || i}>
+											<TableCell>{item.title}</TableCell>
+											<TableCell>
+												{item.description.length > 100 ? item.description.slice(0, 100) + '...' : item.description}
+											</TableCell>
+											<TableCell>
+												{item.image_url && (
+													<Box
+														component='img'
+														src={item.image_url}
+														sx={{ width: 80, height: 60, objectFit: 'cover' }}
+													/>
+												)}
+											</TableCell>
+											<TableCell align='right'>
+												<IconButton onClick={() => openPreviewDialog(item)}>
+													<i className='ri ri-eye-line'></i>
+												</IconButton>
+												<IconButton onClick={() => openEditDialog(item, i)}>
+													<i className='ri ri-pencil-line'></i>
+												</IconButton>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</TableContainer>
+					</CardContent>
+				</Card>
+			</Grid>
 
-      // Handle error here
-    } finally {
-      setUploadingImage(false);
-    }
-  };
+			{/* Edit Dialog */}
+			<Dialog open={openDialog} onClose={closeDialogs} fullWidth maxWidth='md'>
+				<DialogTitle>
+					{isNewItem ? 'Add New Onboarding Item' : 'Edit Onboarding Item'}
+					<IconButton aria-label='close' onClick={closeDialogs} sx={{ position: 'absolute', right: 8, top: 8 }}>
+						<i className='ri ri-close-line'></i>
+					</IconButton>
+				</DialogTitle>
+				<DialogContent>
+					<Grid container spacing={3} sx={{ mt: 1 }}>
+						<Grid item xs={12}>
+							<TextField
+								fullWidth
+								name='title'
+								label='Title'
+								value={currentItem?.title || ''}
+								onChange={handleInputChange}
+							/>
+						</Grid>
+						<Grid item xs={12}>
+							<TextField
+								fullWidth
+								name='description'
+								label='Description'
+								multiline
+								rows={4}
+								value={currentItem?.description || ''}
+								onChange={handleInputChange}
+							/>
+						</Grid>
+						<Grid item xs={12}>
+							<Box sx={{ mb: 2 }}>
+								<Typography variant='body1'>Image</Typography>
+								<input
+									accept='image/*'
+									style={{ display: 'none' }}
+									id='image-upload'
+									type='file'
+									onChange={handleImageUpload}
+								/>
+								<label htmlFor='image-upload'>
+									<Button variant='outlined' component='span' disabled={uploadingImage}>
+										{uploadingImage ? 'Uploading...' : 'Upload Image'}
+									</Button>
+								</label>
+							</Box>
+							{currentItem?.image_url && (
+								<Box
+									component='img'
+									src={currentItem.image_url}
+									alt='Preview'
+									sx={{ width: '100%', maxHeight: 200, objectFit: 'contain', mt: 2 }}
+								/>
+							)}
+							<TextField
+								fullWidth
+								label='Image URL'
+								name='image_url'
+								value={currentItem?.image_url || ''}
+								onChange={handleInputChange}
+								sx={{ mt: 2 }}
+							/>
+						</Grid>
+					</Grid>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={closeDialogs}>Cancel</Button>
+					<Button onClick={handleSaveItem} variant='contained' disabled={isLoading || uploadingImage}>
+						{isLoading ? <CircularProgress size={24} /> : 'Save'}
+					</Button>
+				</DialogActions>
+			</Dialog>
 
-  const handleSaveItem = async () => {
-    try {
-      if (!currentItem) return;
-
-      if (isNewItem) {
-        await dispatch(addOnboardingItem(currentItem)).unwrap();
-      } else if (currentItem.id) {
-        console.log('Updating item:', currentItem);
-        await dispatch(
-          updateOnboardingItem({
-            id: currentItem.id,
-            data: currentItem
-          })
-        ).unwrap();
-      }
-
-      handleCloseDialog();
-      dispatch(fetchOnboardingData());
-    } catch (error) {
-      console.error('Error saving item:', error);
-
-      // Error is handled by the reducer
-    }
-  };
-
-  if (isLoading && !items.length) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  return (
-    <Grid container spacing={6}>
-      <Grid item xs={12}>
-        {error && (
-          <Alert severity='error' sx={{ mb: 4 }}>
-            {error}
-          </Alert>
-        )}
-
-        <Card>
-          <CardHeader
-            title='Onboarding Content Management'
-            subheader='Manage onboarding content items shown to users'
-            action={
-              <Button variant='contained' color='primary' onClick={handleAddNewClick}>
-                Add New Item
-              </Button>
-            }
-          />
-          <CardContent>
-            <TableContainer component={Paper}>
-              <Table sx={{ minWidth: 650 }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Title</TableCell>
-                    <TableCell>Description</TableCell>
-                    <TableCell>Image</TableCell>
-                    <TableCell align='right'>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {items.map((item, index) => (
-                    <TableRow key={item.id || index}>
-                      <TableCell>{item.title}</TableCell>
-                      <TableCell>
-                        {item.description.length > 100 ? `${item.description.substring(0, 100)}...` : item.description}
-                      </TableCell>
-                      <TableCell>
-                        {item.image_url && (
-                          <Box
-                            component='img'
-                            src={item.image_url}
-                            alt={item.title}
-                            sx={{ width: 80, height: 60, objectFit: 'cover' }}
-                          />
-                        )}
-                      </TableCell>
-                      <TableCell align='right'>
-                        <IconButton onClick={() => handlePreviewClick(item)}>
-                          <i className='ri ri-eye-line'></i>
-                        </IconButton>
-                        <IconButton onClick={() => handleEditClick(item)}>
-                          <i className='ri ri-pencil-line'></i>
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-      </Grid>
-
-      {/* Edit Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth='md' fullWidth>
-        <DialogTitle>
-          {isNewItem ? 'Add New Onboarding Item' : 'Edit Onboarding Item'}
-          <IconButton
-            aria-label='close'
-            onClick={handleCloseDialog}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8
-            }}
-          >
-            <i className='ri ri-close-line'></i>
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label='Title'
-                name='title'
-                value={currentItem?.title || ''}
-                onChange={handleInputChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label='Description'
-                name='description'
-                multiline
-                rows={4}
-                value={currentItem?.description || ''}
-                onChange={handleInputChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant='body1' gutterBottom>
-                  Image
-                </Typography>
-                <input
-                  accept='image/*'
-                  style={{ display: 'none' }}
-                  id='image-upload-button'
-                  type='file'
-                  onChange={handleImageUpload}
-                />
-                <label htmlFor='image-upload-button'>
-                  <Button variant='outlined' component='span' disabled={uploadingImage}>
-                    {uploadingImage ? 'Uploading...' : 'Upload Image'}
-                  </Button>
-                </label>
-              </Box>
-              {currentItem?.image_url && (
-                <Box
-                  component='img'
-                  src={currentItem.image_url}
-                  alt='Preview'
-                  sx={{
-                    width: '100%',
-                    maxHeight: 200,
-                    objectFit: 'contain',
-                    mt: 2
-                  }}
-                />
-              )}
-              <TextField
-                fullWidth
-                label='Image URL'
-                name='image_url'
-                value={currentItem?.image_url || ''}
-                onChange={handleInputChange}
-                sx={{ mt: 2 }}
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleSaveItem} variant='contained' color='primary' disabled={isLoading || uploadingImage}>
-            {isLoading ? <CircularProgress size={24} /> : 'Save'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Preview Dialog */}
-      <Dialog open={previewDialog} onClose={handleCloseDialog} maxWidth='md' fullWidth>
-        <DialogTitle>
-          Preview
-          <IconButton
-            aria-label='close'
-            onClick={handleCloseDialog}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8
-            }}
-          >
-            <i className='ri ri-close-line'></i>
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          {currentItem && (
-            <Box sx={{ p: 2 }}>
-              <Box
-                component='img'
-                src={currentItem.image_url}
-                alt={currentItem.title}
-                sx={{
-                  width: '100%',
-                  maxHeight: 300,
-                  objectFit: 'contain',
-                  mb: 3
-                }}
-              />
-              <Typography variant='h5' gutterBottom>
-                {currentItem.title}
-              </Typography>
-              <Typography variant='body1'>{currentItem.description}</Typography>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Close</Button>
-          {currentItem && (
-            <Button
-              onClick={() => {
-                handleCloseDialog();
-                handleEditClick(currentItem);
-              }}
-              color='primary'
-            >
-              Edit
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
-    </Grid>
-  );
+			{/* Preview Dialog */}
+			<Dialog open={previewDialog} onClose={closeDialogs} fullWidth maxWidth='md'>
+				<DialogTitle>
+					Preview
+					<IconButton aria-label='close' onClick={closeDialogs} sx={{ position: 'absolute', right: 8, top: 8 }}>
+						<i className='ri ri-close-line'></i>
+					</IconButton>
+				</DialogTitle>
+				<DialogContent>
+					{currentItem && (
+						<Box sx={{ p: 2 }}>
+							<Box
+								component='img'
+								src={currentItem.image_url}
+								alt={currentItem.title}
+								sx={{ width: '100%', maxHeight: 300, objectFit: 'contain', mb: 3 }}
+							/>
+							<Typography variant='h5' gutterBottom>
+								{currentItem.title}
+							</Typography>
+							<Typography variant='body1'>{currentItem.description}</Typography>
+						</Box>
+					)}
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={closeDialogs}>Close</Button>
+				</DialogActions>
+			</Dialog>
+		</Grid>
+	);
 };
 
 export default OnboardingAdmin;
