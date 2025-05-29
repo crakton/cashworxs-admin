@@ -14,26 +14,26 @@ import { getMode, getSettingsFromCookie } from '@core/utils/serverHelpers';
 import ReduxProvider from './ReduxProvider';
 
 type Props = ChildrenType & {
-  direction: Direction
+	direction: Direction;
 };
 
 const Providers = (props: Props) => {
-  // Props
-  const { children, direction } = props;
+	// Props
+	const { children, direction } = props;
 
-  // Vars
-  const mode = getMode();
-  const settingsCookie = getSettingsFromCookie();
+	// Vars
+	const mode = getMode();
+	const settingsCookie = getSettingsFromCookie();
 
-  return (
-    <ReduxProvider>
-      <VerticalNavProvider>
-        <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
-          <ThemeProvider direction={direction}>{children}</ThemeProvider>
-        </SettingsProvider>
-      </VerticalNavProvider>
-    </ReduxProvider>
-  );
+	return (
+		<ReduxProvider>
+			<VerticalNavProvider>
+				<SettingsProvider settingsCookie={settingsCookie} mode={mode}>
+					<ThemeProvider direction={direction}>{children}</ThemeProvider>
+				</SettingsProvider>
+			</VerticalNavProvider>
+		</ReduxProvider>
+	);
 };
 
 export default Providers;
