@@ -8,89 +8,90 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 // Types
 export interface Invoice {
-  id: number
-  tdate: string
-  c_code: string
-  c_name: string
-  c_address: string
-  c_phone: string
-  c_number: string
-  amount: string
-  note: string
-  status: number
-  log_time: string
-  created_at: string
-  updated_at: string
-  mda_id: number
-  invoice_number: string
-  c_tin: string | null
-  c_email: string
-  client_invoice_number: string
-  deleted_at: string | null
-  customer_id: string
+  id: number;
+  tdate: string;
+  c_code: string;
+  c_name: string;
+  c_address: string;
+  c_phone: string;
+  c_number: string;
+  amount: string;
+  note: string;
+  status: number;
+  log_time: string;
+  created_at: string;
+  updated_at: string;
+  mda_id: number;
+  invoice_number: string;
+  c_tin: string | null;
+  c_email: string;
+  client_invoice_number: string;
+  deleted_at: string | null;
+  customer_id: string;
 }
 
 export interface PaymentPayload {
-  ServiceUrl: string
-  ServiceUsername: string
-  ServicePassword: string
-  FtpUrl: string
-  FtpUsername: string
-  FtpPassword: string
-  PaymentLogId: string
-  CustReference: string
-  AlternateCustReference: string
-  Amount: string
-  PaymentMethod: string
-  PaymentReference: string
-  TerminalId: string
-  ChannelName: string
-  Location: string
-  PaymentDate: string
-  InstitutionId: string
-  InstitutionName: string
-  BranchName: string
-  BankName: string
-  CustomerName: string
-  OtherCustomerInfo: string
-  ReceiptNo: string
-  CollectionsAccount: string
-  BankCode: string
-  CustomerAddress: string
-  CustomerPhoneNumber: string
-  DepositorName: string
-  DepositSlipNumber: string
-  PaymentCurrency: string
-  ItemName: string
-  ItemCode: string
-  ItemAmount: string
-  LeadBankCode: string
-  LeadBankCbnCode: string
-  LeadBankName: string
-  CategoryCode: string
-  CategoryName: string
-  ProductGroupCode: string
-  PaymentStatus: string
-  IsReversal: string
-  SettlementDate: string
-  FeeName: string
-  ThirdPartyCode: string
-  OriginalPaymentReference: string
-  OriginalPaymentLogId: string
-  Teller: string
+  ServiceUrl: string;
+  ServiceUsername: string;
+  ServicePassword: string;
+  FtpUrl: string;
+  FtpUsername: string;
+  FtpPassword: string;
+  PaymentLogId: string;
+  CustReference: string;
+  AlternateCustReference: string;
+  Amount: string;
+  PaymentMethod: string;
+  PaymentReference: string;
+  TerminalId: string;
+  ChannelName: string;
+  Location: string;
+  PaymentDate: string;
+  InstitutionId: string;
+  InstitutionName: string;
+  BranchName: string;
+  BankName: string;
+  CustomerName: string;
+  OtherCustomerInfo: string;
+  ReceiptNo: string;
+  CollectionsAccount: string;
+  BankCode: string;
+  CustomerAddress: string;
+  CustomerPhoneNumber: string;
+  DepositorName: string;
+  DepositSlipNumber: string;
+  PaymentCurrency: string;
+  ItemName: string;
+  ItemCode: string;
+  ItemAmount: string;
+  LeadBankCode: string;
+  LeadBankCbnCode: string;
+  LeadBankName: string;
+  CategoryCode: string;
+  CategoryName: string;
+  ProductGroupCode: string;
+  PaymentStatus: string;
+  IsReversal: string;
+  SettlementDate: string;
+  FeeName: string;
+  ThirdPartyCode: string;
+  OriginalPaymentReference: string;
+  OriginalPaymentLogId: string;
+  Teller: string;
 }
 
 export interface Payment {
-  invoice_number: string
-  receipt_no: string
-  tdate: string
-  amount: string
-  note: string
-  status: number
-  log_time: string
-  invoice: Invoice
-  payload: PaymentPayload
+  invoice_number: string;
+  receipt_no: string;
+  tdate: string;
+  amount: string;
+  note: string;
+  status: number;
+  log_time: string;
+  invoice: Invoice;
+  payload: PaymentPayload;
 }
+
 
 export interface PaymentsState {
   payments: Payment[]
@@ -121,7 +122,6 @@ export const fetchAllPayments = createAsyncThunk('payments/fetchAll', async (_, 
         Authorization: `Bearer ${token}`
       }
     });
-
     return response.data.data.payments;
   } catch (error: any) {
     if (error.response?.status === 401) {
@@ -148,7 +148,7 @@ export const fetchPaymentDetails = createAsyncThunk(
         }
       });
 
-      return response.data.data;
+      return response.data.data.payment;
     } catch (error: any) {
       if (error.response?.status === 401) {
         Cookies.remove('auth_token');

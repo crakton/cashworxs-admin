@@ -10,6 +10,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 // Types
 export interface User {
+  is_active: boolean;
   id: string
   email: string
   name?: string
@@ -218,6 +219,19 @@ export const fetchUserTransactions = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch transactions');
+    }
+  }
+);
+
+export const toggleUserStatus = createAsyncThunk(
+  'users/toggleStatus',
+  async ({ userId, isActive }: { userId: string; isActive: boolean }, { rejectWithValue }) => {
+    try {
+      // API call to update user status
+      const response = await axios.put(`/users/${userId}/status`, { isActive });
+      return response.data;
+    } catch (error:any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update user status');
     }
   }
 );

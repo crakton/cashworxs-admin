@@ -9,27 +9,36 @@ import type { User } from './userSlice';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 // Types
-export interface Transaction {
-	id: number;
-	description: string;
-	amount: number;
-	created_at: string;
-	user: {
-		name: string;
-		email: string;
-	};
+export interface DashboardStats {
+  total_users: number;
+  total_service_fees: number;
+  total_service_taxes: number;
+  recent_transactions: Transaction[];
+  recent_users: User[];
+  weekly_data: WeeklyData;
+  service_fees_business: number;
+  service_fees_government: number;
+  service_taxes_governmental: number;
+  service_taxes_private: number;
+  user_growth: {
+    count: number;
+    percentage: number;
+  };
+  total_revenue: number;
+  new_transactions: number;
+  total_transactions: number;
+  success_rate: number;
 }
 
-export interface DashboardStats {
-	total_users: number;
-	total_service_fees: number;
-	total_service_taxes: number;
-	recent_transactions: Transaction[];
-	recent_users: User[];
-	service_fees_business: number;
-	service_fees_government: number;
-	service_taxes_private: number;
-	service_taxes_governmental: number;
+export interface Transaction {
+  // Add properties here if you expect transaction data to populate later
+  [key: string]: any;
+}
+
+interface WeeklyData {
+  labels: string[];
+  users: number[];
+  transactions: number[];
 }
 
 export interface DashboardState {
@@ -61,6 +70,8 @@ export const fetchDashboardStats = createAsyncThunk(
 					Authorization: `Bearer ${token}`
 				}
 			});
+
+			console.log('Dashboard stats response:', response.data);
 
 			return response.data.data;
 		} catch (error: any) {

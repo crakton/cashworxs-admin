@@ -10,6 +10,8 @@ import paymentsReducer from './slices/paymentsSlice';
 import invoicesReducer from './slices/invoicesSlice';
 import feesReducer from './slices/feesSlice';
 import taxesReducer from './slices/taxesSlice';
+import identityConfigReducer from './slices/identityConfigSlice';
+import userManagementReducer from './slices/userManagementSlice';
 
 export const store = configureStore({
   reducer: {
@@ -22,7 +24,9 @@ export const store = configureStore({
     payments: paymentsReducer,
     fees: feesReducer,
     taxes: taxesReducer,
-    invoices: invoicesReducer
+    invoices: invoicesReducer,
+    identityConfig: identityConfigReducer,
+    userManagement: userManagementReducer
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
