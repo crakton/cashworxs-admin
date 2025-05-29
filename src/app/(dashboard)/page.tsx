@@ -23,116 +23,99 @@ import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
 import { fetchDashboardStats } from '@/store/slices/dashboardSlice';
 
 const CashworxsAdminDashboard = () => {
-  const dispatch = useAppDispatch();
-  const { stats, isLoading, error } = useAppSelector(state => state.dashboard);
+	const dispatch = useAppDispatch();
+	const { stats, isLoading, error } = useAppSelector(state => state.dashboard);
 
-  useEffect(() => {
-    dispatch(fetchDashboardStats());
-  }, [dispatch]);
+	useEffect(() => {
+		dispatch(fetchDashboardStats());
+	}, [dispatch]);
 
-  if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <LinearProgress />
-      </Box>
-    );
-  }
+	if (isLoading) {
+		return (
+			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+				<LinearProgress />
+			</Box>
+		);
+	}
 
-  if (error) {
-    return (
-      <Alert severity='error' sx={{ mb: 4 }}>
-        {error}
-      </Alert>
-    );
-  }
+	if (error) {
+		return (
+			<Alert severity='error' sx={{ mb: 4 }}>
+				{error}
+			</Alert>
+		);
+	}
 
-  if (!stats) {
-    return <Alert severity='info'>No dashboard data available</Alert>;
-  }
+	if (!stats) {
+		return <Alert severity='info'>No dashboard data available</Alert>;
+	}
 
-  return (
-    <Grid container spacing={6}>
-      {/* Overview Card */}
-      <Grid item xs={12} md={4}>
-        <CashworxsOverview totalUsers={stats.total_users} totalFees={stats.total_fees} />
-      </Grid>
+	return (
+		<Grid container spacing={6}>
+			{/* Overview Card */}
+			<Grid item xs={12} md={4}>
+				<CashworxsOverview totalUsers={stats.total_users} total_transactions={stats.total_transactions} />
+			</Grid>
 
-      {/* Metrics Overview */}
-      <Grid item xs={12} md={8}>
-        <MetricsOverview dashboardData={stats} />
-      </Grid>
+			{/* Metrics Overview */}
+			<Grid item xs={12} md={8}>
+				<MetricsOverview dashboardData={stats} />
+			</Grid>
 
-      {/* Weekly Overview Chart */}
-      <Grid item xs={12} md={6} lg={8}>
-        <CashworxsWeeklyOverview />
-      </Grid>
+			{/* Weekly Overview Chart */}
+			<Grid item xs={12} md={16} lg={8}>
+				<CashworxsWeeklyOverview />
+			</Grid>
 
-      {/* Fee Distribution */}
-      <Grid item xs={12} md={6} lg={4}>
-        <FeesDistribution dashboardData={stats} />
-      </Grid>
+			{/* Stats Grid */}
+			<Grid item xs={12} md={6} lg={4}>
+				<Grid container spacing={6}>
+					<Grid item xs={12} sm={6}>
+						<CardStatVertical
+							title='User Growth'
+							stats={stats.success_rate?.toPrecision(2) + '%'}
+							avatarIcon='ri-user-add-line'
+							avatarColor='success'
+							subtitle='This month'
+							trendNumber='16%'
+							trend='positive'
+						/>
+					</Grid>
+					<Grid item xs={12} sm={6}>
+						<CardStatVertical
+							stats={'$' + stats.total_revenue?.toLocaleString()}
+							trend='positive'
+							trendNumber='8.2%'
+							title='Total Revenue'
+							subtitle='This quarter'
+							avatarColor='primary'
+							avatarIcon='ri-money-dollar-circle-line'
+						/>
+					</Grid>
+					<Grid item xs={12} sm={6}>
+						<CardStatVertical
+							stats={stats.new_transactions?.toLocaleString()}
+							trend='negative'
+							trendNumber='3%'
+							title='New Transactions'
+							subtitle='This week'
+							avatarColor='warning'
+							avatarIcon='ri-exchange-dollar-line'
+						/>
+					</Grid>
+				</Grid>
+			</Grid>
 
-      {/* Recent Users */}
-      <Grid item xs={12} md={6} lg={4}>
-        <RecentUsers users={stats.recent_users} />
-      </Grid>
-
-      {/* Stats Grid */}
-      <Grid item xs={12} md={6} lg={4}>
-        <Grid container spacing={6}>
-          <Grid item xs={12} sm={6}>
-            <CardStatVertical
-              title='User Growth'
-              stats='+12.4%'
-              avatarIcon='ri-user-add-line'
-              avatarColor='success'
-              subtitle='This month'
-              trendNumber='16%'
-              trend='positive'
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <CardStatVertical
-              stats='$24.5k'
-              trend='positive'
-              trendNumber='8.2%'
-              title='Total Revenue'
-              subtitle='This quarter'
-              avatarColor='primary'
-              avatarIcon='ri-money-dollar-circle-line'
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <CardStatVertical
-              stats='142'
-              trend='negative'
-              trendNumber='3%'
-              title='New Transactions'
-              subtitle='This week'
-              avatarColor='warning'
-              avatarIcon='ri-exchange-dollar-line'
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <CardStatVertical
-              stats='68.2%'
-              trend='positive'
-              trendNumber='5.4%'
-              title='Success Rate'
-              subtitle='This month'
-              avatarColor='info'
-              avatarIcon='ri-check-double-line'
-            />
-          </Grid>
-        </Grid>
-      </Grid>
-
-      {/* Recent Transactions */}
-      <Grid item xs={12} lg={4}>
-        <RecentTransactions transactions={stats.recent_transactions} />
-      </Grid>
-    </Grid>
-  );
+			{/* Recent Users */}
+			<Grid item xs={12} md={6} lg={4}>
+				<RecentUsers users={stats.recent_users} />
+			</Grid>
+			{/* Recent Transactions */}
+			<Grid item xs={12} lg={4}>
+				<RecentTransactions transactions={stats.recent_transactions} />
+			</Grid>
+		</Grid>
+	);
 };
 
 export default CashworxsAdminDashboard;

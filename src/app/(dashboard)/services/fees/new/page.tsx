@@ -30,7 +30,7 @@ import Paper from '@mui/material/Paper';
 // Redux Imports
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
 import { createServiceFee, fetchOrganizations } from '@/store/slices/feesSlice';
-import { nigerianStates } from '@/libs/constant';
+import { nigerianStates, serviceTypes } from '@/libs/constant';
 
 const CreateFeeServicePage = () => {
   const router = useRouter();
@@ -272,11 +272,11 @@ const CreateFeeServicePage = () => {
                       label='Fee Type'
                       disabled={isLoading}
                     >
-                      <MenuItem value='standard'>Standard</MenuItem>
-                      <MenuItem value='premium'>Premium</MenuItem>
-                      <MenuItem value='custom'>Custom</MenuItem>
-                      <MenuItem value='government'>Government</MenuItem>
-                      <MenuItem value='private'>Private</MenuItem>
+                     {serviceTypes.map(type => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      ))}
                     </Select>
                     <FormHelperText>Select the type of fee service</FormHelperText>
                   </FormControl>
