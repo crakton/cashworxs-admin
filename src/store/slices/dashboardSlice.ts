@@ -10,35 +10,37 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 // Types
 export interface DashboardStats {
-  total_users: number;
-  total_service_fees: number;
-  total_service_taxes: number;
-  recent_transactions: Transaction[];
-  recent_users: User[];
-  weekly_data: WeeklyData;
-  service_fees_business: number;
-  service_fees_government: number;
-  service_taxes_governmental: number;
-  service_taxes_private: number;
-  user_growth: {
-    count: number;
-    percentage: number;
-  };
-  total_revenue: number;
-  new_transactions: number;
-  total_transactions: number;
-  success_rate: number;
+	total_users: number;
+	total_service_fees: number;
+	total_service_taxes: number;
+	recent_transactions: Transaction[];
+	recent_users: User[];
+	weekly_data: WeeklyData;
+	service_fees_business: number;
+	service_fees_government: number;
+	service_taxes_governmental: number;
+	service_taxes_private: number;
+	user_growth: {
+		count: number;
+		percentage: number;
+	};
+	total_revenue: number;
+	new_transactions: number;
+	total_transactions: number;
+	success_rate: number;
+	total_fees: number;
+	total_taxes: number;
 }
 
 export interface Transaction {
-  // Add properties here if you expect transaction data to populate later
-  [key: string]: any;
+	// Add properties here if you expect transaction data to populate later
+	[key: string]: any;
 }
 
 interface WeeklyData {
-  labels: string[];
-  users: number[];
-  transactions: number[];
+	labels: string[];
+	users: number[];
+	transactions: number[];
 }
 
 export interface DashboardState {
