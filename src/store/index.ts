@@ -12,6 +12,7 @@ import feesReducer from './slices/feesSlice';
 import taxesReducer from './slices/taxesSlice';
 import identityConfigReducer from './slices/identityConfigSlice';
 import userManagementReducer from './slices/userManagementSlice';
+import notificationsReducer from './slices/notificationsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -26,7 +27,8 @@ export const store = configureStore({
     taxes: taxesReducer,
     invoices: invoicesReducer,
     identityConfig: identityConfigReducer,
-    userManagement: userManagementReducer
+    userManagement: userManagementReducer,
+    notifications: notificationsReducer
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

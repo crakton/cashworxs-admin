@@ -29,7 +29,7 @@ import {
 
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
-import { fetchOnboardingData, updateOnboardingItem, addOnboardingItem } from '@/store/slices/onboardingSlice';
+import { fetchOnboardingData, updateOnboardingItems } from '@/store/slices/onboardingSlice';
 
 interface OnboardingItem {
 	id?: string;
@@ -49,6 +49,7 @@ const OnboardingAdmin = () => {
 	const [previewDialog, setPreviewDialog] = useState(false);
 	const [uploadingImage, setUploadingImage] = useState(false);
 	const [isNewItem, setIsNewItem] = useState(false);
+	const [isSaving, setIsSaving] = useState(false);
 
 	useEffect(() => {
 		dispatch(fetchOnboardingData());
@@ -83,6 +84,7 @@ const OnboardingAdmin = () => {
 		setOpenDialog(false);
 		setPreviewDialog(false);
 		setCurrentItem(null);
+		setItemIndex(undefined);
 	};
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,18 +103,17 @@ const OnboardingAdmin = () => {
 
 		try {
 			const formData = new FormData();
-			formData.append('image', file);
+			formData.append('file', file);
 
-			const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/upload-image`, formData, {
+			const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/platforms/media/upload`, formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data',
 					Authorization: `Bearer ${token}`
 				}
 			});
 
-			if (response.data?.url) {
-				setCurrentItem(prev => (prev ? { ...prev, image_url: response.data.url } : prev));
-				console.log('Image uploaded:', response.data.url);
+			if (response.data.data?.url) {
+				setCurrentItem(prev => (prev ? { ...prev, image_url: response.data.data.url } : prev));
 			} else {
 				console.warn('No image URL returned from upload.');
 			}
@@ -124,24 +125,48 @@ const OnboardingAdmin = () => {
 	};
 
 	const handleSaveItem = async () => {
-		if (!currentItem || itemIndex === undefined) {
+		if (!currentItem) {
 			console.warn('No item to save.');
 			return;
 		}
+
+		setIsSaving(true);
 		console.log('Saving item:', currentItem);
+
 		try {
+			let updatedItems: OnboardingItem[];
+
 			if (isNewItem) {
-				await dispatch(addOnboardingItem(currentItem)).unwrap();
-				console.log('Item added successfully.');
-			} else if (currentItem.id) {
-				await dispatch(updateOnboardingItem({ index: itemIndex, data: currentItem })).unwrap();
-				console.log('Item updated successfully.');
+				// Add new item to the array
+				updatedItems = [...items, currentItem];
+				console.log('Adding new item to array');
+			} else if (itemIndex !== undefined) {
+				// Update existing item in the array
+				updatedItems = [...items];
+				updatedItems[itemIndex] = currentItem;
+				console.log('Updating item at index:', itemIndex);
+			} else {
+				console.warn('Invalid state for saving item');
+				return;
 			}
 
+			// Send complete update to backend
+			 dispatch(await updateOnboardingItems({data:updatedItems}));
+			console.log('Complete onboarding update successful');
+
+			// // Update local state
+			// setItems(updatedItems);
+			
 			closeDialogs();
-			dispatch(fetchOnboardingData());
+			
+			// Optionally refresh data from server to ensure consistency
+			dispatch(await fetchOnboardingData());
+			
 		} catch (error) {
 			console.error('Save failed:', error);
+			// You might want to show an error message to the user here
+		} finally {
+			setIsSaving(false);
 		}
 	};
 
@@ -166,11 +191,11 @@ const OnboardingAdmin = () => {
 					<CardHeader
 						title='Onboarding Content Management'
 						subheader='Manage onboarding content items shown to users'
-						action={
-							<Button variant='contained' onClick={openNewDialog}>
-								Add New Item
-							</Button>
-						}
+						// action={
+						// 	<Button variant='contained' onClick={openNewDialog} disabled={isSaving}>
+						// 		Add New Item
+						// 	</Button>
+						// }
 					/>
 					<CardContent>
 						<TableContainer component={Paper}>
@@ -200,12 +225,16 @@ const OnboardingAdmin = () => {
 												)}
 											</TableCell>
 											<TableCell align='right'>
-												<IconButton onClick={() => openPreviewDialog(item)}>
+												<IconButton onClick={() => openPreviewDialog(item)} disabled={isSaving}>
 													<i className='ri ri-eye-line'></i>
 												</IconButton>
-												<IconButton onClick={() => openEditDialog(item, i)}>
+												<IconButton onClick={() => openEditDialog(item, i)} disabled={isSaving}>
 													<i className='ri ri-pencil-line'></i>
 												</IconButton>
+												{/* Uncomment if you want delete functionality */}
+												{/* <IconButton onClick={() => handleDeleteItem(i)} disabled={isSaving}>
+													<i className='ri ri-delete-bin-line'></i>
+												</IconButton> */}
 											</TableCell>
 										</TableRow>
 									))}
@@ -233,6 +262,7 @@ const OnboardingAdmin = () => {
 								label='Title'
 								value={currentItem?.title || ''}
 								onChange={handleInputChange}
+								disabled={isSaving}
 							/>
 						</Grid>
 						<Grid item xs={12}>
@@ -244,6 +274,7 @@ const OnboardingAdmin = () => {
 								rows={4}
 								value={currentItem?.description || ''}
 								onChange={handleInputChange}
+								disabled={isSaving}
 							/>
 						</Grid>
 						<Grid item xs={12}>
@@ -255,9 +286,10 @@ const OnboardingAdmin = () => {
 									id='image-upload'
 									type='file'
 									onChange={handleImageUpload}
+									disabled={uploadingImage || isSaving}
 								/>
 								<label htmlFor='image-upload'>
-									<Button variant='outlined' component='span' disabled={uploadingImage}>
+									<Button variant='outlined' component='span' disabled={uploadingImage || isSaving}>
 										{uploadingImage ? 'Uploading...' : 'Upload Image'}
 									</Button>
 								</label>
@@ -277,14 +309,15 @@ const OnboardingAdmin = () => {
 								value={currentItem?.image_url || ''}
 								onChange={handleInputChange}
 								sx={{ mt: 2 }}
+								disabled={isSaving}
 							/>
 						</Grid>
 					</Grid>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={closeDialogs}>Cancel</Button>
-					<Button onClick={handleSaveItem} variant='contained' disabled={isLoading || uploadingImage}>
-						{isLoading ? <CircularProgress size={24} /> : 'Save'}
+					<Button onClick={closeDialogs} disabled={isSaving}>Cancel</Button>
+					<Button onClick={handleSaveItem} variant='contained' disabled={isSaving || uploadingImage}>
+						{isSaving ? <CircularProgress size={24} /> : 'Save'}
 					</Button>
 				</DialogActions>
 			</Dialog>

@@ -2,7 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
-import { fetchUsers, addUser, toggleUserStatus, clearSuccessMessage, MOCK_STATES } from '@/store/slices/userManagementSlice';
+import { 
+  fetchUsers, 
+  addUser, 
+  updateUser,
+  toggleUserStatus, 
+  deleteUser,
+  fetchStates,
+  fetchAvailableRoles,
+  clearUserError,
+  clearSuccessMessage,
+  setCurrentUser,
+  type NewUser 
+} from '@/store/slices/userManagementSlice';
 import { fetchOrganizations } from '@/store/slices/organizationsSlice';
 import {
   Box,
@@ -16,7 +28,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Divider,
   FormControl,
   FormHelperText,
   Grid,
@@ -40,10 +51,13 @@ import {
   TextField,
   Tooltip,
   Typography,
-  Alert
+  Alert,
+  Menu,
+  ListItemIcon,
+  ListItemText
 } from '@mui/material';
 
-// Form validation
+// Form validation interface
 interface FormErrors {
   name?: string;
   phone?: string;
@@ -54,11 +68,22 @@ interface FormErrors {
   state?: string;
 }
 
+// Dialog modes
+type DialogMode = 'add' | 'edit' | 'view' | null;
+
 const UserRolesPage = () => {
   const dispatch = useAppDispatch();
   
   // Get data from Redux store
-  const { users, currentUser, isLoading, error, successMessage } = useAppSelector(state => state.userManagement);
+  const { 
+    users, 
+    currentUser, 
+    availableStates, 
+    availableRoles, 
+    isLoading, 
+    error, 
+    successMessage 
+  } = useAppSelector(state => state.userManagement);
   const { organizations } = useAppSelector(state => state.organizations);
   
   // Local state for pagination
@@ -66,8 +91,17 @@ const UserRolesPage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   
   // Dialog state
-  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [dialogMode, setDialogMode] = useState<DialogMode>(null);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Menu state for actions
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuUserId, setMenuUserId] = useState<string | null>(null);
+  
+  // Delete confirmation dialog
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -75,7 +109,7 @@ const UserRolesPage = () => {
     phone: '',
     email: '',
     password: '',
-    role: 'operator',
+    role: 'operator' as 'admin' | 'operator' | 'irs_specialist',
     organizationId: '',
     state: ''
   });
@@ -86,11 +120,23 @@ const UserRolesPage = () => {
   // Filter users to exclude current user
   const filteredUsers = users.filter(user => currentUser && user.id !== currentUser.id);
   
-  // Load users and organizations when component mounts
+  // Load initial data when component mounts
   useEffect(() => {
     dispatch(fetchUsers());
     dispatch(fetchOrganizations());
+    dispatch(fetchStates());
+    dispatch(fetchAvailableRoles());
   }, [dispatch]);
+  
+  // Clear error when component unmounts or error changes
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        dispatch(clearUserError());
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, dispatch]);
   
   // Handle pagination changes
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -102,46 +148,73 @@ const UserRolesPage = () => {
     setPage(0);
   };
   
-  // Dialog handlers
-  const handleOpenAddDialog = () => {
-    setOpenAddDialog(true);
+  // Menu handlers
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, userId: string) => {
+    setAnchorEl(event.currentTarget);
+    setMenuUserId(userId);
   };
   
-  const handleCloseAddDialog = () => {
-    setOpenAddDialog(false);
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setMenuUserId(null);
+  };
+  
+  // Dialog handlers
+  const handleOpenDialog = (mode: DialogMode, user?: any) => {
+    setDialogMode(mode);
+    if (user) {
+      setSelectedUser(user);
+      setFormData({
+        name: user.name || '',
+        phone: user.phone || '',
+        email: user.email || '',
+        password: '', // Never pre-fill password
+        role: user.role || 'operator',
+        organizationId: user.organization?.id || '',
+        state: user.state || ''
+      });
+    } else {
+      resetForm();
+    }
+    handleMenuClose();
+  };
+  
+  const handleCloseDialog = () => {
+    setDialogMode(null);
+    setSelectedUser(null);
     resetForm();
   };
   
   // Form handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: value
-    });
+    }));
     
     // Clear error for this field if it exists
     if (formErrors[name as keyof FormErrors]) {
-      setFormErrors({
-        ...formErrors,
+      setFormErrors(prev => ({
+        ...prev,
         [name]: undefined
-      });
+      }));
     }
   };
   
   const handleSelectChange = (e: any) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: value
-    });
+    }));
     
     // Clear error for this field if it exists
     if (formErrors[name as keyof FormErrors]) {
-      setFormErrors({
-        ...formErrors,
+      setFormErrors(prev => ({
+        ...prev,
         [name]: undefined
-      });
+      }));
     }
   };
   
@@ -169,6 +242,26 @@ const UserRolesPage = () => {
     dispatch(toggleUserStatus(userId));
   };
   
+  // Delete user handlers
+  const handleDeleteConfirm = (userId: string) => {
+    setUserToDelete(userId);
+    setDeleteConfirmOpen(true);
+    handleMenuClose();
+  };
+  
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false);
+    setUserToDelete(null);
+  };
+  
+  const handleDeleteExecute = () => {
+    if (userToDelete) {
+      dispatch(deleteUser(userToDelete));
+      setDeleteConfirmOpen(false);
+      setUserToDelete(null);
+    }
+  };
+  
   // Validate form
   const validateForm = () => {
     const errors: FormErrors = {};
@@ -189,9 +282,14 @@ const UserRolesPage = () => {
       errors.email = 'Invalid email format';
     }
     
-    if (!formData.password.trim()) {
-      errors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
+    // Password validation - required for add mode, optional for edit
+    if (dialogMode === 'add') {
+      if (!formData.password.trim()) {
+        errors.password = 'Password is required';
+      } else if (formData.password.length < 8) {
+        errors.password = 'Password must be at least 8 characters';
+      }
+    } else if (dialogMode === 'edit' && formData.password && formData.password.length < 8) {
       errors.password = 'Password must be at least 8 characters';
     }
     
@@ -214,14 +312,40 @@ const UserRolesPage = () => {
   // Submit form
   const handleSubmitForm = () => {
     if (validateForm()) {
-      dispatch(addUser({ ...formData, role: formData.role as "operator" | "admin" }));
-      handleCloseAddDialog();
+      const userData: NewUser | Partial<NewUser> = {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        role: formData.role,
+        organizationId: formData.organizationId,
+        state: formData.state
+      };
+      
+      // Add password only if provided
+      if (formData.password) {
+        (userData as NewUser).password = formData.password;
+      }
+      
+      if (dialogMode === 'add') {
+        dispatch(addUser(userData as NewUser));
+      } else if (dialogMode === 'edit' && selectedUser) {
+        dispatch(updateUser({ 
+          userId: selectedUser.id, 
+          userData 
+        }));
+      }
+      
+      handleCloseDialog();
     }
   };
   
-  // Close success notification
+  // Close success/error notifications
   const handleCloseSuccessAlert = () => {
     dispatch(clearSuccessMessage());
+  };
+  
+  const handleCloseErrorAlert = () => {
+    dispatch(clearUserError());
   };
   
   // Format date
@@ -229,9 +353,30 @@ const UserRolesPage = () => {
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
-        month: '2-digit',});
+        month: '2-digit',
+        day: '2-digit'
+      });
     } catch (error) {
       return 'Invalid date';
+    }
+  };
+  
+  // Get role color
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'primary';
+      case 'irs_specialist': return 'secondary';
+      default: return 'default';
+    }
+  };
+  
+  // Dialog title based on mode
+  const getDialogTitle = () => {
+    switch (dialogMode) {
+      case 'add': return 'Add New User';
+      case 'edit': return 'Edit User';
+      case 'view': return 'User Details';
+      default: return '';
     }
   };
   
@@ -250,26 +395,30 @@ const UserRolesPage = () => {
       </Snackbar>
       
       {/* Error display */}
-      {error && (
-        <Grid item xs={12}>
-          <Alert severity="error" sx={{ mb: 4 }}>
-            {error}
-          </Alert>
-        </Grid>
-      )}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={8000}
+        onClose={handleCloseErrorAlert}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseErrorAlert} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
       
       {/* Page Header */}
       <Grid item xs={12}>
         <Card>
           <CardHeader 
             title="User Role Management" 
-            subheader="Manage admin users and operators"
+            subheader={`Manage admin users and operators (${filteredUsers.length} users)`}
             action={
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleOpenAddDialog}
-                startIcon={<i className="ri-user-add-line"></i>}
+                onClick={() => handleOpenDialog('add')}
+                startIcon={<i className="ri-add-line" />}
+                disabled={isLoading}
               >
                 Add User
               </Button>
@@ -296,6 +445,7 @@ const UserRolesPage = () => {
                     <TableCell>State</TableCell>
                     <TableCell>Created</TableCell>
                     <TableCell align="center">Status</TableCell>
+                    <TableCell align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -322,8 +472,8 @@ const UserRolesPage = () => {
                         </TableCell>
                         <TableCell>
                           <Chip 
-                            label={user.role.toUpperCase()} 
-                            color={user.role === 'admin' ? 'primary' : 'default'}
+                            label={user.role.replace('_', ' ').toUpperCase()} 
+                            color={getRoleColor(user.role) as any}
                             size="small"
                           />
                         </TableCell>
@@ -340,11 +490,19 @@ const UserRolesPage = () => {
                             />
                           </Tooltip>
                         </TableCell>
+                        <TableCell align="center">
+                          <IconButton
+                            onClick={(e) => handleMenuOpen(e, user.id)}
+                            disabled={isLoading}
+                          >
+                            <i className="ri-more-2-line" />
+                          </IconButton>
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                      <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
                         {isLoading ? (
                           <Typography>Loading users...</Typography>
                         ) : (
@@ -371,17 +529,54 @@ const UserRolesPage = () => {
         </Card>
       </Grid>
       
-      {/* Add User Dialog */}
+      {/* Actions Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={() => {
+          const user = users.find(u => u.id === menuUserId);
+          handleOpenDialog('view', user);
+        }}>
+          <ListItemIcon>
+            <i className="ri-eye-line"/>
+          </ListItemIcon>
+          <ListItemText>View Details</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => {
+          const user = users.find(u => u.id === menuUserId);
+          handleOpenDialog('edit', user);
+        }}>
+          <ListItemIcon>
+            <i className="ri-edit-line"/>
+          </ListItemIcon>
+          <ListItemText>Edit User</ListItemText>
+        </MenuItem>
+        <MenuItem 
+          onClick={() => menuUserId && handleDeleteConfirm(menuUserId)}
+          sx={{ color: 'error.main' }}
+        >
+          <ListItemIcon>
+            <i className="ri-delete-bin-6-line" />
+          </ListItemIcon>
+          <ListItemText>Delete User</ListItemText>
+        </MenuItem>
+      </Menu>
+      
+      {/* Add/Edit User Dialog */}
       <Dialog
-        open={openAddDialog}
-        onClose={handleCloseAddDialog}
+        open={dialogMode === 'add' || dialogMode === 'edit' || dialogMode === 'view'}
+        onClose={handleCloseDialog}
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Add New User</DialogTitle>
+        <DialogTitle>{getDialogTitle()}</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 3 }}>
-            Fill in the details below to add a new user. Select their organization, state, and role.
+            {dialogMode === 'add' && 'Fill in the details below to add a new user. Select their organization, state, and role.'}
+            {dialogMode === 'edit' && 'Update the user details below. Leave password empty to keep current password.'}
+            {dialogMode === 'view' && 'View user details below.'}
           </DialogContentText>
           
           <Grid container spacing={3}>
@@ -394,6 +589,7 @@ const UserRolesPage = () => {
                   value={formData.organizationId}
                   onChange={handleSelectChange}
                   label="Organization"
+                  disabled={dialogMode === 'view'}
                 >
                   {organizations.map((org) => (
                     <MenuItem key={org.id} value={org.id}>
@@ -413,8 +609,9 @@ const UserRolesPage = () => {
                   value={formData.state}
                   onChange={handleSelectChange}
                   label="State"
+                  disabled={dialogMode === 'view'}
                 >
-                  {MOCK_STATES.map((state) => (
+                  {availableStates.map((state) => (
                     <MenuItem key={state} value={state}>
                       {state}
                     </MenuItem>
@@ -432,9 +629,22 @@ const UserRolesPage = () => {
                   value={formData.role}
                   onChange={handleSelectChange}
                   label="Role"
+                  disabled={dialogMode === 'view'}
                 >
-                  <MenuItem value="admin">Admin</MenuItem>
-                  <MenuItem value="operator">Operator</MenuItem>
+                  {availableRoles.length > 0 ? (
+                    availableRoles.map((role) => (
+                      <MenuItem key={role} value={role}>
+                        {role.replace('_', ' ').toUpperCase()}
+                      </MenuItem>
+                    ))
+                  ) : (
+                    // Fallback to default roles if availableRoles is empty
+                    <>
+                      <MenuItem value="admin">Admin</MenuItem>
+                      <MenuItem value="operator">Operator</MenuItem>
+                      <MenuItem value="irs_specialist">IRS Specialist</MenuItem>
+                    </>
+                  )}
                 </Select>
                 {formErrors.role && (
                   <FormHelperText>{formErrors.role}</FormHelperText>
@@ -452,6 +662,7 @@ const UserRolesPage = () => {
                 onChange={handleInputChange}
                 error={!!formErrors.name}
                 helperText={formErrors.name}
+                disabled={dialogMode === 'view'}
                 sx={{ mb: 2 }}
               />
               
@@ -464,6 +675,7 @@ const UserRolesPage = () => {
                 placeholder="+2347012345678"
                 error={!!formErrors.phone}
                 helperText={formErrors.phone}
+                disabled={dialogMode === 'view'}
                 sx={{ mb: 2 }}
               />
               
@@ -476,47 +688,84 @@ const UserRolesPage = () => {
                 onChange={handleInputChange}
                 error={!!formErrors.email}
                 helperText={formErrors.email}
+                disabled={dialogMode === 'view'}
                 sx={{ mb: 2 }}
               />
               
-              <TextField
-                fullWidth
-                label="Password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleInputChange}
-                error={!!formErrors.password}
-                helperText={formErrors.password}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleTogglePasswordVisibility}
-                        edge="end"
-                      >
-                        <i className={showPassword ? "ri-eye-off-line" : "ri-eye-line"}></i>
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
+              {dialogMode !== 'view' && (
+                <TextField
+                  fullWidth
+                  label={dialogMode === 'edit' ? 'New Password (optional)' : 'Password'}
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  error={!!formErrors.password}
+                  helperText={formErrors.password || (dialogMode === 'edit' ? 'Leave empty to keep current password' : '')}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                        >
+                          {showPassword ? <i className='ri-eye-off-line' /> : <i className="ri-eye-line" />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseAddDialog} color="secondary">
+          <Button onClick={handleCloseDialog} color="secondary">
+            {dialogMode === 'view' ? 'Close' : 'Cancel'}
+          </Button>
+          {dialogMode !== 'view' && (
+            <Button
+              onClick={handleSubmitForm}
+              variant="contained"
+              color="primary"
+              startIcon={isLoading ? <div className="animate-spin">⏳</div> : <i className="ri-save-line" />}
+              disabled={isLoading}
+            >
+              {isLoading ? 
+                (dialogMode === 'add' ? 'Adding...' : 'Updating...') : 
+                (dialogMode === 'add' ? 'Add User' : 'Update User')
+              }
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={handleDeleteCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this user? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} color="secondary">
             Cancel
           </Button>
           <Button
-            onClick={handleSubmitForm}
+            onClick={handleDeleteExecute}
             variant="contained"
-            color="primary"
-            startIcon={isLoading ? <i className="ri-loader-4-line"></i> : <i className="ri-save-line"></i>}
+            color="error"
+            startIcon={isLoading ? <div className="animate-spin">⏳</div> : <i className='ri-delete-bin-6-line' />}
             disabled={isLoading}
           >
-            {isLoading ? 'Adding...' : 'Add User'}
+            {isLoading ? 'Deleting...' : 'Delete User'}
           </Button>
         </DialogActions>
       </Dialog>

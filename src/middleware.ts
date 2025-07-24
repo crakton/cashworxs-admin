@@ -19,8 +19,9 @@ export function middleware(request: NextRequest) {
 
 	// If not authenticated and trying to access protected route, redirect to login
 	if (!token && !isPublicRoute) {
-		const url = new URL('/login' /* , request.url */);
-
+		const url = new URL('/login', request.url);
+		
+		// Optional: Add callback URL parameter
 		// url.searchParams.set('callbackUrl', encodeURI(pathname));
 
 		return NextResponse.redirect(url);

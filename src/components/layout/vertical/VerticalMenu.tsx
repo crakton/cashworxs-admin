@@ -109,6 +109,9 @@ const VerticalMenu = ({ scrollMenu }: { scrollMenu: (container: any, isPerfectSc
 						<MenuItem href='/settings/user-roles' icon={<i className='ri-user-settings-line' />}>
 							User Roles
 						</MenuItem>
+						<MenuItem href='/settings/notifications' icon={<i className='ri-notification-line' />}>
+							Notifications
+						</MenuItem>
 					</SubMenu>
 				</MenuSection>
 			</Menu>

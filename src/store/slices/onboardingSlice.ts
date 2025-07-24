@@ -8,7 +8,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 // Types
 interface OnboardingItem {
-	id?: string;
 	title: string;
 	description: string;
 	image_url: string;
@@ -57,32 +56,32 @@ export const fetchOnboardingData = createAsyncThunk('onboarding/fetchData', asyn
 	}
 });
 
-export const addOnboardingItem = createAsyncThunk(
-	'onboarding/addItem',
-	async (data: OnboardingItem, { rejectWithValue }) => {
-		try {
-			const token = Cookies.get('auth_token');
+// export const addOnboardingItem = createAsyncThunk(
+// 	'onboarding/addItem',
+// 	async (data: OnboardingItem, { rejectWithValue }) => {
+// 		try {
+// 			const token = Cookies.get('auth_token');
 
-			if (!token) {
-				return rejectWithValue('No token found');
-			}
+// 			if (!token) {
+// 				return rejectWithValue('No token found');
+// 			}
 
-			const response = await axios.post(`${API_URL}/onboarding`, data, {
-				headers: {
-					Authorization: `Bearer ${token}`
-				}
-			});
+// 			const response = await axios.post(`${API_URL}/onboarding`, data, {
+// 				headers: {
+// 					Authorization: `Bearer ${token}`
+// 				}
+// 			});
 
-			return response.data.data;
-		} catch (error: any) {
-			return rejectWithValue(error.response?.data?.message || 'Failed to add onboarding item');
-		}
-	}
-);
+// 			return response.data.data;
+// 		} catch (error: any) {
+// 			return rejectWithValue(error.response?.data?.message || 'Failed to add onboarding item');
+// 		}
+// 	}
+// );
 
-export const updateOnboardingItem = createAsyncThunk(
+export const updateOnboardingItems = createAsyncThunk(
 	'onboarding/updateItem',
-	async ({ index, data }: { index: number; data: OnboardingItem }, { rejectWithValue }) => {
+	async ({ data }: { data: OnboardingItem[] }, { rejectWithValue }) => {
 		try {
 			const token = Cookies.get('auth_token');
 
@@ -90,14 +89,14 @@ export const updateOnboardingItem = createAsyncThunk(
 				return rejectWithValue('No token found');
 			}
 
-			const response = await axios.put(`${API_URL}/onboarding/${index}`, data, {
+			const response = await axios.put(`${API_URL}/onboarding`, {items: data}, {
 				headers: {
 					Authorization: `Bearer ${token}`
 				}
 			});
-
-			return response.data.data;
+			return response.data.data.onboarding_data;
 		} catch (error: any) {
+			console.log("error: ", error)
 			return rejectWithValue(error.response?.data?.message || 'Failed to update onboarding item');
 		}
 	}
@@ -197,43 +196,44 @@ const onboardingSlice = createSlice({
 			state.error = action.payload as string;
 		});
 
-		// Add onboarding item
-		builder.addCase(addOnboardingItem.pending, state => {
+		// // Add onboarding item
+		// builder.addCase(addOnboardingItem.pending, state => {
+		// 	state.isLoading = true;
+		// 	state.error = null;
+		// });
+		// builder.addCase(addOnboardingItem.fulfilled, (state, action: PayloadAction<OnboardingItem>) => {
+		// 	state.isLoading = false;
+
+		// 	if (state.onboardingData) {
+		// 		state.onboardingData = [...state.onboardingData, action.payload];
+		// 	} else {
+		// 		state.onboardingData = [action.payload];
+		// 	}
+
+		// 	state.error = null;
+		// });
+		// builder.addCase(addOnboardingItem.rejected, (state, action) => {
+		// 	state.isLoading = false;
+		// 	state.error = action.payload as string;
+		// });
+
+		// Update onboarding item
+		builder.addCase(updateOnboardingItems.pending, state => {
 			state.isLoading = true;
 			state.error = null;
 		});
-		builder.addCase(addOnboardingItem.fulfilled, (state, action: PayloadAction<OnboardingItem>) => {
+		builder.addCase(updateOnboardingItems.fulfilled, (state, action: PayloadAction<OnboardingItem[]>) => {
 			state.isLoading = false;
 
-			if (state.onboardingData) {
-				state.onboardingData = [...state.onboardingData, action.payload];
-			} else {
-				state.onboardingData = [action.payload];
-			}
-
-			state.error = null;
+		
+				 state.onboardingData = action.payload;
 		});
-		builder.addCase(addOnboardingItem.rejected, (state, action) => {
+		builder.addCase(updateOnboardingItems.rejected, (state, action) => {
 			state.isLoading = false;
 			state.error = action.payload as string;
 		});
 
-		// Update onboarding item
-		builder.addCase(updateOnboardingItem.pending, state => {
-			state.isLoading = true;
-			state.error = null;
-		});
-		builder.addCase(updateOnboardingItem.fulfilled, (state, action: PayloadAction<OnboardingItem>) => {
-			state.isLoading = false;
 
-			if (state.onboardingData) {
-				const index = state.onboardingData.findIndex(item => item.id === action.payload.id);
-
-				if (index !== -1) {
-					state.onboardingData[index] = action.payload;
-				}
-			}
-		});
 	}
 });
 
