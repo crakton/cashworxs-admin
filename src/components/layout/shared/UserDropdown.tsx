@@ -67,13 +67,15 @@ const UserDropdown = () => {
     setOpen(false)
   }
 
-  const { user } = useAppSelector(state => state.auth)
+  const auth = useAppSelector(state => state.auth)
+  // Fix: Check for both null and undefined
+  const user = auth?.user || null;
 
   useEffect(() => {
     if (!user) {
       dispatch(getUser())
     }
-  }, [user])
+  }, [user, dispatch])
 
   return (
     <>

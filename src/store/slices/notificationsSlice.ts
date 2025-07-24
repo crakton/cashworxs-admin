@@ -27,6 +27,7 @@ export interface Notification {
   metadata?: any;
   scheduled_at?: string;
   created_at: string;
+  read_at?: string;
 }
 
 export interface NewNotification {
@@ -257,7 +258,7 @@ const notificationsSlice = createSlice({
     builder.addCase(markNotificationAsRead.fulfilled, (state, action) => {
       const notification = state.userNotifications.find(n => n.id === action.payload.notificationId);
       if (notification) {
-        // notification.read_at = new Date().toISOString();
+        notification.read_at = new Date().toISOString();
       }
     });
   }

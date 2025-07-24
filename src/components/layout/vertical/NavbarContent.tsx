@@ -25,9 +25,11 @@ const NavbarContent = () => {
       </div>
       <div className='flex items-center'>
         <ModeDropdown />
-        {/* <IconButton className='text-textPrimary'>
-          <i className='ri-notification-2-line' />
-        </IconButton> */}
+        <Link href="/settings/notifications" passHref>
+          <IconButton className='text-textPrimary' component="a">
+            <i className='ri-notification-2-line' />
+          </IconButton>
+        </Link>
         <UserDropdown />
       </div>
     </div>

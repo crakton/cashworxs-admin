@@ -87,7 +87,9 @@ const NotificationsPage = () => {
     error, 
     successMessage 
   } = useAppSelector(state => state.notifications);
-  const { user } = useAppSelector(state => state.auth);
+   const auth = useAppSelector(state => state.auth)
+    // Fix: Check for both null and undefined
+    const user = auth?.user || null;
   
   // Local state for pagination
   const [page, setPage] = useState(0);
