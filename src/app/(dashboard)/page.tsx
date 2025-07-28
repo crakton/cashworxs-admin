@@ -6,7 +6,6 @@ import { useEffect } from 'react';
 // MUI Imports
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
-import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 
 // Components Imports
@@ -17,7 +16,7 @@ import MetricsOverview from '@views/dashboard/MetricsOverview';
 import RecentTransactions from '@views/dashboard/RecentTransactions';
 import RecentUsers from '@views/dashboard/RecentUsers';
 import CashworxsWeeklyOverview from '@views/dashboard/CashworxsWeeklyOverview';
-import FeesDistribution from '@views/dashboard/FeesDistribution';
+// import FeesDistribution from '@views/dashboard/FeesDistribution';
 import CardStatVertical from '@components/card-statistics/Vertical';
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
 import { fetchDashboardStats } from '@/store/slices/dashboardSlice';
