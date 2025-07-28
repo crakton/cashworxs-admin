@@ -15,25 +15,27 @@ import userManagementReducer from './slices/userManagementSlice';
 import notificationsReducer from './slices/notificationsSlice';
 
 export const store = configureStore({
-  reducer: {
-    activities: activitiesReducer,
-    auth: authReducer,
-    dashboard: dashboardReducer,
-    onboarding: onboardingReducer,
-    organizations: organizationsReducer,
-    users: userReducer,
-    payments: paymentsReducer,
-    fees: feesReducer,
-    taxes: taxesReducer,
-    invoices: invoicesReducer,
-    identityConfig: identityConfigReducer,
-    userManagement: userManagementReducer,
-    notifications: notificationsReducer
-  },
-  middleware: getDefaultMiddleware =>
-    getDefaultMiddleware({
-      serializableCheck: false
-    })
+	reducer: {
+		activities: activitiesReducer,
+		auth: authReducer,
+		dashboard: dashboardReducer,
+		onboarding: onboardingReducer,
+		organizations: organizationsReducer,
+		users: userReducer,
+		payments: paymentsReducer,
+		fees: feesReducer,
+		taxes: taxesReducer,
+		invoices: invoicesReducer,
+		identityConfig: identityConfigReducer,
+		userManagement: userManagementReducer,
+		notifications: notificationsReducer
+	},
+	middleware: getDefaultMiddleware =>
+		getDefaultMiddleware({
+			serializableCheck: {
+				ignoredActions: ['persist/PERSIST']
+			}
+		})
 });
 
 export type RootState = ReturnType<typeof store.getState>;

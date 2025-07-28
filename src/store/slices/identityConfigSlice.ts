@@ -5,78 +5,35 @@ import Cookies from 'js-cookie';
 // Define API base URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
-// MOCK DATA FOR DEVELOPMENT
-// This mock data simulates what would come from the API
-const MOCK_IDENTITY_TYPES = [
-  { 
-    id: 1, 
-    type: 'Org ID', 
-    description: 'Organization Identification Number',
-    isCompulsory: true,
-    isActive: true
-  },
-  { 
-    id: 2, 
-    type: 'NIN', 
-    description: 'National Identification Number',
-    isCompulsory: false,
-    isActive: true
-  },
-  { 
-    id: 3, 
-    type: 'BVN', 
-    description: 'Bank Verification Number',
-    isCompulsory: true,
-    isActive: true
-  },
-  { 
-    id: 4, 
-    type: 'Email', 
-    description: 'Email Address',
-    isCompulsory: true,
-    isActive: true
-  },
-  { 
-    id: 5, 
-    type: 'Address', 
-    description: 'Physical Address',
-    isCompulsory: false,
-    isActive: true
-  },
-  { 
-    id: 6, 
-    type: 'Phone', 
-    description: 'Phone Number',
-    isCompulsory: true,
-    isActive: true
-  },
-  { 
-    id: 7, 
-    type: 'Passport', 
-    description: 'International Passport Number',
-    isCompulsory: false,
-    isActive: false
-  },
-  { 
-    id: 8, 
-    type: 'TIN', 
-    description: 'Tax Identification Number',
-    isCompulsory: false,
-    isActive: false
-  }
-];
-
-// Types
-export interface IdentityType {
+// Types based on your PHP controller structure
+export interface IdConfig {
   id: number;
-  type: string;
-  description: string;
-  isCompulsory: boolean;
-  isActive: boolean;
+  field_name: string;
+  field_label: string;
+  field_type: 'text' | 'number' | 'email' | 'phone' | 'file';
+  is_required: boolean;
+  validation_rules?: string | null;
+  help_text?: string | null;
+  is_active: boolean;
+  sort_order: number;
+  organization_id: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Organization {
+  id: number;
+  name: string;
+}
+
+export interface FieldType {
+  [key: string]: string;
 }
 
 export interface IdentityConfigState {
-  identityTypes: IdentityType[];
+  idConfigs: IdConfig[];
+  organization: Organization | null;
+  fieldTypes: FieldType;
   isLoading: boolean;
   error: string | null;
   successMessage: string | null;
@@ -84,85 +41,149 @@ export interface IdentityConfigState {
 
 // Initial state
 const initialState: IdentityConfigState = {
-  identityTypes: [],
+  idConfigs: [],
+  organization: null,
+  fieldTypes: {},
   isLoading: false,
   error: null,
   successMessage: null
 };
 
+// Helper function to get auth headers
+const getAuthHeaders = () => {
+  const token = Cookies.get('auth_token');
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  };
+};
+
 // Async thunks
-export const fetchIdentityConfig = createAsyncThunk(
+export const fetchIdConfigs = createAsyncThunk(
   'identityConfig/fetchAll',
-   async (organizationId: string, { rejectWithValue }) =>  {
+  async (organizationId: string, { rejectWithValue }) => {
     try {
-      const token = Cookies.get('auth_token');
-
-      if (!token) {
-        return rejectWithValue('No token found');
-      }
-
-      // UNCOMMENT THIS WHEN BACKEND IS READY
-      /* 
-      const response = await axios.get(`${API_URL}/platforms/identity-config`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await axios.get(
+        `${API_URL}/organizations/${organizationId}/id-configs`,
+        getAuthHeaders()
+      );
       
       return response.data.data;
-      */
-      
-      // FOR DEVELOPMENT: Return mock data after simulating API delay
-      return new Promise<IdentityType[]>((resolve) => {
-        setTimeout(() => {
-          resolve([...MOCK_IDENTITY_TYPES]);
-        }, 800);
-      });
-      
     } catch (error: any) {
       if (error.response?.status === 401) {
         Cookies.remove('auth_token');
       }
-
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch identity configuration');
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch ID configurations');
     }
   }
 );
 
-export const updateIdentityConfig = createAsyncThunk(
-  'identityConfig/update',
- async ({ organizationId, configData }: { organizationId: string, configData: IdentityType[] }, { rejectWithValue }) => {
+export const createIdConfig = createAsyncThunk(
+  'identityConfig/create',
+  async ({ organizationId, configData }: { organizationId: string, configData: Partial<IdConfig> }, { rejectWithValue }) => {
     try {
-      const token = Cookies.get('auth_token');
-
-      if (!token) {
-        return rejectWithValue('No token found');
-      }
-
-      // UNCOMMENT THIS WHEN BACKEND IS READY
-      /* 
-      const response = await axios.put(`${API_URL}/platforms/identity-config`, { identityTypes: configData }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
+      const response = await axios.post(
+        `${API_URL}/organizations/${organizationId}/id-configs`,
+        configData,
+        getAuthHeaders()
+      );
+      
       return response.data.data;
-      */
-      
-      // FOR DEVELOPMENT: Return the updated data after simulating API delay
-      return new Promise<IdentityType[]>((resolve) => {
-        setTimeout(() => {
-          resolve([...configData]);
-        }, 1000);
-      });
-      
     } catch (error: any) {
       if (error.response?.status === 401) {
         Cookies.remove('auth_token');
       }
+      return rejectWithValue(error.response?.data?.message || 'Failed to create ID configuration');
+    }
+  }
+);
 
-      return rejectWithValue(error.response?.data?.message || 'Failed to update identity configuration');
+export const updateIdConfig = createAsyncThunk(
+  'identityConfig/update',
+  async ({ organizationId, configId, configData }: { 
+    organizationId: string, 
+    configId: number, 
+    configData: Partial<IdConfig> 
+  }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/organizations/${organizationId}/id-configs/${configId}`,
+        configData,
+        getAuthHeaders()
+      );
+      
+      return response.data.data;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        Cookies.remove('auth_token');
+      }
+      return rejectWithValue(error.response?.data?.message || 'Failed to update ID configuration');
+    }
+  }
+);
+
+export const deleteIdConfig = createAsyncThunk(
+  'identityConfig/delete',
+  async ({ organizationId, configId }: { organizationId: string, configId: number }, { rejectWithValue }) => {
+    try {
+      await axios.delete(
+        `${API_URL}/organizations/${organizationId}/id-configs/${configId}`,
+        getAuthHeaders()
+      );
+      
+      return configId;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        Cookies.remove('auth_token');
+      }
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete ID configuration');
+    }
+  }
+);
+
+export const reorderIdConfigs = createAsyncThunk(
+  'identityConfig/reorder',
+  async ({ organizationId, configs }: { 
+    organizationId: string, 
+    configs: { id: number, sort_order: number }[] 
+  }, { rejectWithValue }) => {
+    try {
+      await axios.post(
+        `${API_URL}/organizations/${organizationId}/id-configs/reorder`,
+        { configs },
+        getAuthHeaders()
+      );
+      
+      return configs;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        Cookies.remove('auth_token');
+      }
+      return rejectWithValue(error.response?.data?.message || 'Failed to reorder ID configurations');
+    }
+  }
+);
+
+export const fetchFieldTypes = createAsyncThunk(
+  'identityConfig/fetchFieldTypes',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/organizations/id-configs/field-types`,
+        getAuthHeaders()
+      );
+      
+      return response.data.data;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        Cookies.remove('auth_token');
+      }
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch field types');
     }
   }
 );
@@ -172,49 +193,135 @@ const identityConfigSlice = createSlice({
   name: 'identityConfig',
   initialState,
   reducers: {
-    clearIdentityConfigError: state => {
+    clearError: state => {
       state.error = null;
     },
     clearSuccessMessage: state => {
       state.successMessage = null;
+    },
+    updateLocalConfig: (state, action) => {
+      const { id, updates } = action.payload;
+      const configIndex = state.idConfigs.findIndex(config => config.id === id);
+      if (configIndex !== -1) {
+        state.idConfigs[configIndex] = { ...state.idConfigs[configIndex], ...updates };
+      }
+    },
+    revertLocalChanges: (state, action) => {
+      // This would be used to revert local changes before saving
+      state.idConfigs = action.payload;
     }
   },
   extraReducers: builder => {
-    // Fetch identity config
-    builder.addCase(fetchIdentityConfig.pending, state => {
+    // Fetch ID configs
+    builder.addCase(fetchIdConfigs.pending, state => {
       state.isLoading = true;
       state.error = null;
     });
-    builder.addCase(fetchIdentityConfig.fulfilled, (state, action) => {
+    builder.addCase(fetchIdConfigs.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.identityTypes = action.payload;
+      state.idConfigs = action.payload.identities || [];
+      state.organization = action.payload.organization || null;
       state.error = null;
     });
-    builder.addCase(fetchIdentityConfig.rejected, (state, action) => {
+    builder.addCase(fetchIdConfigs.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload as string;
     });
 
-    // Update identity config
-    builder.addCase(updateIdentityConfig.pending, state => {
+    // Create ID config
+    builder.addCase(createIdConfig.pending, state => {
       state.isLoading = true;
       state.error = null;
-      state.successMessage = null;
     });
-    builder.addCase(updateIdentityConfig.fulfilled, (state, action) => {
+    builder.addCase(createIdConfig.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.identityTypes = action.payload;
-      state.successMessage = 'Identity configuration updated successfully';
+      state.idConfigs.push(action.payload.data);
+      state.successMessage = 'ID configuration created successfully';
       state.error = null;
     });
-    builder.addCase(updateIdentityConfig.rejected, (state, action) => {
+    builder.addCase(createIdConfig.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload as string;
-      state.successMessage = null;
+    });
+
+    // Update ID config
+    builder.addCase(updateIdConfig.pending, state => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(updateIdConfig.fulfilled, (state, action) => {
+      state.isLoading = false;
+      const index = state.idConfigs.findIndex(config => config.id === action.payload.data.id);
+      if (index !== -1) {
+        state.idConfigs[index] = action.payload.data;
+      }
+      state.successMessage = 'ID configuration updated successfully';
+      state.error = null;
+    });
+    builder.addCase(updateIdConfig.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string;
+    });
+
+    // Delete ID config
+    builder.addCase(deleteIdConfig.pending, state => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(deleteIdConfig.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.idConfigs = state.idConfigs.filter(config => config.id !== action.payload);
+      state.successMessage = 'ID configuration deleted successfully';
+      state.error = null;
+    });
+    builder.addCase(deleteIdConfig.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string;
+    });
+
+    // Reorder ID configs
+    builder.addCase(reorderIdConfigs.pending, state => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(reorderIdConfigs.fulfilled, (state, action) => {
+      state.isLoading = false;
+      // Update sort orders locally
+      action.payload.forEach(({ id, sort_order }) => {
+        const config = state.idConfigs.find(c => c.id === id);
+        if (config) {
+          config.sort_order = sort_order;
+        }
+      });
+      // Re-sort the array
+      state.idConfigs.sort((a, b) => a.sort_order - b.sort_order);
+      state.successMessage = 'ID configurations reordered successfully';
+      state.error = null;
+    });
+    builder.addCase(reorderIdConfigs.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string;
+    });
+
+    // Fetch field types
+    builder.addCase(fetchFieldTypes.pending, state => {
+      state.error = null;
+    });
+    builder.addCase(fetchFieldTypes.fulfilled, (state, action) => {
+      state.fieldTypes = action.payload;
+      state.error = null;
+    });
+    builder.addCase(fetchFieldTypes.rejected, (state, action) => {
+      state.error = action.payload as string;
     });
   }
 });
 
-export const { clearIdentityConfigError, clearSuccessMessage } = identityConfigSlice.actions;
+export const { 
+  clearError, 
+  clearSuccessMessage, 
+  updateLocalConfig, 
+  revertLocalChanges 
+} = identityConfigSlice.actions;
 
 export default identityConfigSlice.reducer;

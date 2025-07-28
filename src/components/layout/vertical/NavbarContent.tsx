@@ -17,23 +17,23 @@ import UserDropdown from '@components/layout/shared/UserDropdown';
 import { verticalLayoutClasses } from '@layouts/utils/layoutClasses';
 
 const NavbarContent = () => {
-  return (
-    <div className={classnames(verticalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}>
-      <div className='flex items-center gap-2 sm:gap-4'>
-        <NavToggle />
-        <NavSearch />
-      </div>
-      <div className='flex items-center'>
-        <ModeDropdown />
-        <Link href="/settings/notifications" passHref>
-          <IconButton className='text-textPrimary' component="a">
-            <i className='ri-notification-2-line' />
-          </IconButton>
-        </Link>
-        <UserDropdown />
-      </div>
-    </div>
-  );
+	return (
+		<div className={classnames(verticalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}>
+			<div className='flex items-center gap-2 sm:gap-4'>
+				<NavToggle />
+				<NavSearch />
+			</div>
+			<div className='flex items-center'>
+				<ModeDropdown />
+				<IconButton className='text-textPrimary' component='a'>
+					<Link href='/settings/notifications'>
+						<i className='ri-notification-2-line' />
+					</Link>
+				</IconButton>
+				<UserDropdown />
+			</div>
+		</div>
+	);
 };
 
 export default NavbarContent;
