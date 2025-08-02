@@ -1,19 +1,9 @@
 'use client';
 
+// React Imports
 import { useState, useEffect, useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
-import {
-	fetchNotifications,
-	fetchUserNotifications,
-	sendNotification,
-	fetchAvailableStates,
-	fetchUsersForNotification,
-	markNotificationAsRead,
-	clearNotificationError,
-	clearNotificationSuccess,
-	type NewNotification
-} from '@/store/slices/notificationsSlice';
-import { getUserProfile } from '@/store/slices/authSlice';
+
+// MUI Imports
 import {
 	Box,
 	Button,
@@ -49,6 +39,23 @@ import {
 	Avatar,
 	Badge
 } from '@mui/material';
+
+// Redux Imports
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import {
+	fetchNotifications,
+	fetchUserNotifications,
+	sendNotification,
+	fetchAvailableStates,
+	fetchUsersForNotification,
+	markNotificationAsRead,
+	clearNotificationError,
+	clearNotificationSuccess,
+	type NewNotification
+} from '@/store/slices/notificationsSlice';
+import { getUserProfile } from '@/store/slices/authSlice';
+
+// Date Imports
 import { formatDistanceToNow } from 'date-fns';
 
 // Form validation interface
@@ -70,25 +77,19 @@ const initialFormData: NewNotification = {
 	type: 'admin'
 };
 
-// Default empty arrays to prevent undefined issues
-const defaultNotifications: any[] = [];
-const defaultUserNotifications: any[] = [];
-const defaultAvailableStates: any[] = [];
-const defaultUsers: any[] = [];
-
 export default function NotificationsPage() {
 	const [mounted, setMounted] = useState(false);
 	const dispatch = useAppDispatch();
 
-	// Get data from Redux store with safe defaults
+	// Get data from Redux store
 	const notificationsState = useAppSelector(state => state.notifications);
 	const authState = useAppSelector(state => state.auth);
 
 	const {
-		notifications = defaultNotifications,
-		userNotifications = defaultUserNotifications,
-		availableStates = defaultAvailableStates,
-		users = defaultUsers,
+		notifications = [],
+		userNotifications = [],
+		availableStates = [],
+		users = [],
 		isLoading = false,
 		error = null,
 		successMessage = null
@@ -319,14 +320,11 @@ export default function NotificationsPage() {
 	};
 
 	// Filter unread notifications safely
-	const unreadCount = Array.isArray(userNotifications) ? userNotifications.filter(n => n && !n.read_at).length : 0;
+	const unreadCount = userNotifications.filter(n => !n.read_at).length;
 
 	// Get paginated notifications
-	const paginatedNotifications = Array.isArray(notifications)
-		? rowsPerPage > 0
-			? notifications.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-			: notifications
-		: [];
+	const paginatedNotifications =
+		rowsPerPage > 0 ? notifications.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : notifications;
 
 	return (
 		<Grid container spacing={6}>
@@ -458,7 +456,7 @@ export default function NotificationsPage() {
 								</Table>
 
 								{/* Pagination */}
-								{Array.isArray(notifications) && notifications.length > 0 && (
+								{notifications.length > 0 && (
 									<TablePagination
 										rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
 										component='div'
@@ -475,7 +473,7 @@ export default function NotificationsPage() {
 						{currentTab === 'user' && (
 							<Box>
 								<List sx={{ width: '100%' }}>
-									{Array.isArray(userNotifications) && userNotifications.length > 0 ? (
+									{userNotifications.length > 0 ? (
 										userNotifications.map((notification, index) => (
 											<ListItem
 												key={notification?.id || index}
@@ -570,12 +568,11 @@ export default function NotificationsPage() {
 													onChange={handleSelectChange}
 													label='State'
 												>
-													{Array.isArray(availableStates) &&
-														availableStates.map((state, index) => (
-															<MenuItem key={state || index} value={state}>
-																{state}
-															</MenuItem>
-														))}
+													{availableStates.map((state, index) => (
+														<MenuItem key={state || index} value={state}>
+															{state}
+														</MenuItem>
+													))}
 												</Select>
 												{formErrors.state_id && <FormHelperText>{formErrors.state_id}</FormHelperText>}
 											</FormControl>
@@ -590,12 +587,11 @@ export default function NotificationsPage() {
 													onChange={handleSelectChange}
 													label='User'
 												>
-													{Array.isArray(users) &&
-														users.map(user => (
-															<MenuItem key={user?.id} value={user?.id}>
-																{user?.name} ({user?.email})
-															</MenuItem>
-														))}
+													{users.map(user => (
+														<MenuItem key={user?.id} value={user?.id}>
+															{user?.name} ({user?.email})
+														</MenuItem>
+													))}
 												</Select>
 												{formErrors.user_id && <FormHelperText>{formErrors.user_id}</FormHelperText>}
 											</FormControl>

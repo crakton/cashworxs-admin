@@ -32,13 +32,6 @@ import InputLabel from '@mui/material/InputLabel';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 
-// Icons
-import ChevronDown from '@/assets/svg/icons/chevron-down.svg';
-import PlusIcon from '@/assets/svg/icons/plus.svg';
-import EditIcon from '@/assets/svg/icons/pencil-outline.svg';
-import DeleteIcon from '@/assets/svg/icons/delete-outline.svg';
-import AddCircleOutlineIcon from '@/assets/svg/icons/plus-circle-outline.svg';
-import RemoveCircleOutlineIcon from '@/assets/svg/icons/minus-circle-outline.svg';
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
 import type { Activity } from '@/store/slices/activitiesSlice';
 import { createActivity, deleteActivity, fetchActivities, updateActivity } from '@/store/slices/activitiesSlice';
