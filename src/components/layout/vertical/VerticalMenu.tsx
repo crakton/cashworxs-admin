@@ -1,3 +1,4 @@
+'use client';
 // MUI Imports
 import Chip from '@mui/material/Chip';
 import { useTheme } from '@mui/material/styles';
@@ -109,7 +110,7 @@ const VerticalMenu = ({ scrollMenu }: { scrollMenu: (container: any, isPerfectSc
 						<MenuItem href='/settings/user-roles' icon={<i className='ri-user-settings-line' />}>
 							User Roles
 						</MenuItem>
-						<MenuItem href='/settings/notifications' icon={<i className='ri-notification-line' />}>
+						<MenuItem href='/notifications' icon={<i className='ri-notification-line' />}>
 							Notifications
 						</MenuItem>
 					</SubMenu>

@@ -1,5 +1,5 @@
 // Next Imports
-import Link from 'next/link';
+// import Link from 'next/link';
 
 // MUI Imports
 import IconButton from '@mui/material/IconButton';
@@ -25,11 +25,11 @@ const NavbarContent = () => {
 			</div>
 			<div className='flex items-center'>
 				<ModeDropdown />
-				<IconButton className='text-textPrimary' component='a'>
+				{/* <IconButton className='text-textPrimary' component='a'>
 					<Link href='/settings/notifications'>
 						<i className='ri-notification-2-line' />
 					</Link>
-				</IconButton>
+				</IconButton> */}
 				<UserDropdown />
 			</div>
 		</div>
